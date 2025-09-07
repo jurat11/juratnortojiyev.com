@@ -156,8 +156,8 @@ const Contact = () => {
     {
       icon: <Mail className="w-6 h-6" />,
       label: 'Email',
-      value: 'juratjushkinovich@gmail.com',
-      href: 'mailto:juratjushkinovich@gmail.com'
+      value: 'juratnortojiyev@unlockadmissions.uz',
+      href: 'mailto:juratnortojiyev@unlockadmissions.uz'
     },
     {
       icon: <MapPin className="w-6 h-6" />,

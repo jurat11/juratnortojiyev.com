@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Send } from 'lucide-react';
-import heroImage from '../assets/hero-developer.jpg';
+import heroImage from '../assets/juratphoto.jpg';
 
 const Hero = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -115,16 +115,6 @@ const Hero = () => {
                   <div className="absolute -inset-2 bg-gradient-to-r from-mint/20 to-blue/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
                 </span>
               </h1>
-              <h2 
-                className="text-lg sm:text-xl lg:text-3xl text-muted-foreground font-light transition-all duration-1000 ease-out animate-gentle-glow" 
-                style={{ 
-                  transitionDelay: '0.3s',
-                  opacity: isVisible ? 1 : 0,
-                  transform: isVisible ? 'translateY(0)' : 'translateY(20px)'
-                }}
-              >
-                Web Developer & AI Enthusiast
-              </h2>
             </div>
 
             <p 
@@ -177,11 +167,11 @@ const Hero = () => {
             }`} 
             style={{ transitionDelay: '0.5s' }}
           >
-            <div className="relative group">
+            <div className="relative group max-w-md mx-auto">
               <img
                 src={heroImage}
-                alt="Developer workspace"
-                className="w-full h-auto rounded-xl lg:rounded-2xl shadow-elegant group-hover:shadow-aurora transition-all duration-500 group-hover:scale-105 relative z-10"
+                alt="Nortojiyev Jur'at"
+                className="w-full h-auto max-h-[32rem] object-cover rounded-xl lg:rounded-2xl shadow-elegant group-hover:shadow-aurora transition-all duration-500 group-hover:scale-105 relative z-10"
                 style={{
                   ...parallaxTransform(0.05)
                 }}

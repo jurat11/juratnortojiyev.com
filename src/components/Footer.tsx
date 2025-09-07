@@ -15,7 +15,7 @@ const Footer = () => {
     },
     {
       name: 'Email',
-      href: 'mailto:juratjushkinovich@gmail.com',
+      href: 'mailto:juratnortojiyev@unlockadmissions.uz',
       icon: <Mail className="w-4 h-4" />
     }
   ];
