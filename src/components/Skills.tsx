@@ -11,6 +11,7 @@ interface Skill {
 
 const Skills = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [animatedPercentages, setAnimatedPercentages] = useState<{ [key: string]: number }>({});
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
   const [scrollY, setScrollY] = useState(0);
@@ -249,18 +250,48 @@ const Skills = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-slide-up' : ''}`}>
+        <div 
+          className={`text-center mb-16 transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
             My <span className="text-gradient">Skills</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Technical expertise and proficiency levels
           </p>
+          
+          {/* Toggle Button */}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="btn-primary flex items-center gap-2 mx-auto group"
+          >
+            <span>{isExpanded ? 'Hide Skills' : 'Show Skills'}</span>
+            <svg 
+              className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
+        {/* Collapsible Skills Content */}
+        <div 
+          className={`grid lg:grid-cols-3 gap-12 transition-all duration-500 ease-in-out overflow-hidden ${
+            isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
           {/* Left Column - Programming (including Web Development) */}
-          <div className={`space-y-8 ${isVisible ? 'animate-slide-up' : ''}`} style={{ animationDelay: '0s' }}>
+          <div 
+            className={`space-y-8 transition-all duration-1000 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: '0s' }}
+          >
             <h3 className="text-2xl font-semibold text-mint mb-8 flex items-center gap-3">
               <span className="text-2xl">💻</span>
               {categories.programming}
@@ -311,7 +342,12 @@ const Skills = () => {
           </div>
 
           {/* Middle Column - Research & Development */}
-          <div className={`space-y-8 ${isVisible ? 'animate-slide-up' : ''}`} style={{ animationDelay: '0.2s' }}>
+          <div 
+            className={`space-y-8 transition-all duration-1000 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: '0.2s' }}
+          >
             <h3 className="text-2xl font-semibold text-mint mb-8 flex items-center gap-3">
               <span className="text-2xl">🔬</span>
               {categories.research}
@@ -362,7 +398,12 @@ const Skills = () => {
           </div>
 
           {/* Right Column - Productivity & Management Tools */}
-          <div className={`space-y-8 ${isVisible ? 'animate-slide-up' : ''}`} style={{ animationDelay: '0.4s' }}>
+          <div 
+            className={`space-y-8 transition-all duration-1000 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: '0.4s' }}
+          >
             <h3 className="text-2xl font-semibold text-mint mb-8 flex items-center gap-3">
               <span className="text-2xl">🛠️</span>
               {categories.tools}
@@ -413,24 +454,17 @@ const Skills = () => {
           </div>
         </div>
 
-        {/* Minimal Technical Highlights */}
-        <div className={`mt-20 grid md:grid-cols-3 gap-8 ${isVisible ? 'animate-fade-in' : ''}`} style={{ animationDelay: '1s' }}>
-          <div className="text-center group">
-            <div className="text-4xl font-bold text-gradient mb-2 group-hover:animate-bounce">7+</div>
-            <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">Programming Skills</div>
-            <div className="mt-2 text-xs text-mint/60">HTML, CSS, JS, TS, React, Python, Node.js</div>
-          </div>
-          
-          <div className="text-center group">
-            <div className="text-4xl font-bold text-gradient mb-2 group-hover:animate-pulse">4+</div>
-            <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">Research Areas</div>
-            <div className="mt-2 text-xs text-blue/60">LaTeX, Product, Analytical, Collaborative</div>
-          </div>
-
-          <div className="text-center group">
-            <div className="text-4xl font-bold text-gradient mb-2 group-hover:animate-pulse">5+</div>
-            <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-300">Productivity Tools</div>
-            <div className="mt-2 text-xs text-mint/60">Google Suite, Notion, ClickUp, AI Tools</div>
+        {/* Skills Philosophy */}
+        <div 
+          className={`mt-20 text-center transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+          style={{ transitionDelay: '1s' }}
+        >
+          <div className="max-w-4xl mx-auto">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              I don't believe in listing theories for the sake of looking smart. What matters is practice — building, breaking, and fixing until it works. My skills aren't things I just "know"; they're things I've used, tested, and proven in real situations.
+            </p>
           </div>
         </div>
 

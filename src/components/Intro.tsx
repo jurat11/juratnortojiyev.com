@@ -37,12 +37,22 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
       clearTimeout(minTimeTimer);
     };
   }, []);
+  
 
   return (
     <div className="intro-container">
       <style>{`
         * {
           box-sizing: border-box;
+        }
+
+        html, body {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+          display: none;
         }
 
         :root {
@@ -87,6 +97,7 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
           font-size: calc(1rem + 10vmin);
           text-align: center;
           overflow-x: hidden;
+          overflow-y: hidden;
           min-height: 100vh;
           display: flex;
           flex-direction: column;
@@ -101,21 +112,24 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
           bottom: 2rem;
           left: 50%;
           transform: translateX(-50%);
-          color: var(--c1);
-          font-size: 0.3em;
-          opacity: 0.7;
+          color: #0FFCBE;
+          font-size: 0.35em;
+          opacity: 0.9;
           animation: bounce 2s infinite;
+          text-shadow: 0 0 10px rgba(15, 252, 190, 0.5);
+          font-weight: 600;
+          letter-spacing: 0.1em;
         }
 
         @keyframes bounce {
           0%, 20%, 50%, 80%, 100% {
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0) scale(1);
           }
           40% {
-            transform: translateX(-50%) translateY(-10px);
+            transform: translateX(-50%) translateY(-12px) scale(1.05);
           }
           60% {
-            transform: translateX(-50%) translateY(-5px);
+            transform: translateX(-50%) translateY(-6px) scale(1.02);
           }
         }
 
@@ -134,11 +148,19 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
         .intro span:first-child {
           transform-origin: right bottom;
           animation: wave 250ms 1s ease 3;
+          filter: drop-shadow(0 0 15px rgba(15, 252, 190, 0.6));
         }
 
         .intro span:last-child {
           animation: hover 500ms linear infinite;
+          background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          text-shadow: 0 0 20px rgba(15, 252, 190, 0.4);
         }
+
+
 
         .box {
           margin-block: 80vh;
@@ -146,15 +168,73 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
 
         .text {
           margin-inline: auto;
-          padding-block: 0.2em;
+          padding-block: 0.3em;
           max-inline-size: 20ch;
           text-wrap: balance;
-          background-image: var(--gradient);
-          background-size: 400%;
+          font-size: 0.95em;
+          background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
           background-clip: text;
           -webkit-background-clip: text;
           color: transparent;
-          font-size: 0.9em;
+          animation: hover 500ms linear infinite, welcomeGlow 3s ease-in-out infinite;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          filter: drop-shadow(0 0 15px rgba(15, 252, 190, 0.6));
+        }
+
+        .text:hover {
+          transform: scale(1.05);
+          filter: drop-shadow(0 0 25px rgba(15, 252, 190, 0.8)) drop-shadow(0 0 35px rgba(15, 252, 190, 0.4));
+          background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        @keyframes textShine {
+          0%, 100% {
+            background-position: 0% center;
+          }
+          50% {
+            background-position: 100% center;
+          }
+        }
+
+        @keyframes textGlow {
+          0% {
+            text-shadow: 0 0 30px rgba(15, 252, 190, 0.3), 0 0 40px rgba(15, 252, 190, 0.2);
+          }
+          100% {
+            text-shadow: 0 0 50px rgba(15, 252, 190, 0.5), 0 0 70px rgba(15, 252, 190, 0.3), 0 0 90px rgba(15, 252, 190, 0.2);
+          }
+        }
+
+        @keyframes textFloat {
+          0%, 100% {
+            transform: translateY(0px) translateZ(0px);
+          }
+          25% {
+            transform: translateY(-2px) translateZ(2px);
+          }
+          50% {
+            transform: translateY(-4px) translateZ(4px);
+          }
+          75% {
+            transform: translateY(-2px) translateZ(2px);
+          }
+        }
+
+        @keyframes welcomeGlow {
+          0%, 100% {
+            filter: drop-shadow(0 0 15px rgba(15, 252, 190, 0.6)) drop-shadow(0 0 25px rgba(15, 252, 190, 0.3));
+            background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+          }
+          50% {
+            filter: drop-shadow(0 0 25px rgba(15, 252, 190, 0.8)) drop-shadow(0 0 35px rgba(15, 252, 190, 0.5)) drop-shadow(0 0 45px rgba(15, 252, 190, 0.3));
+            background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+          }
         }
 
         @supports (animation-timeline: view()) {
@@ -193,13 +273,32 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
           top: 0;
           left: 0;
           width: 1em;
-          font-size: 1.5em;
+          font-size: 2em;
           opacity: 0;
-          transition: opacity 0.5s ease;
+          transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          filter: drop-shadow(0 4px 8px rgba(15, 252, 190, 0.3)) drop-shadow(0 2px 4px rgba(16, 110, 190, 0.2));
+          transform: scale(1) rotate(0deg);
+          text-shadow: 0 0 20px rgba(15, 252, 190, 0.5);
         }
 
         .emoji.active {
           opacity: 1;
+          animation: emojiGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes emojiGlow {
+          0% {
+            filter: drop-shadow(0 4px 8px rgba(15, 252, 190, 0.3)) drop-shadow(0 2px 4px rgba(16, 110, 190, 0.2)) brightness(1);
+            transform: scale(1) rotate(0deg);
+          }
+          50% {
+            filter: drop-shadow(0 6px 12px rgba(15, 252, 190, 0.4)) drop-shadow(0 3px 6px rgba(16, 110, 190, 0.3)) brightness(1.1);
+            transform: scale(1.05) rotate(2deg);
+          }
+          100% {
+            filter: drop-shadow(0 8px 16px rgba(15, 252, 190, 0.5)) drop-shadow(0 4px 8px rgba(16, 110, 190, 0.4)) brightness(1.2);
+            transform: scale(1.1) rotate(-1deg);
+          }
         }
 
         .enter-button {
@@ -207,24 +306,33 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
           bottom: 2rem;
           left: 50%;
           transform: translateX(-50%);
-          background: var(--gradient);
-          color: white;
+          background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
+          color: #0f172a;
           border: none;
-          padding: 1rem 2rem;
-          font-size: 1.2rem;
-          font-weight: bold;
-          border-radius: 50px;
+          padding: 1.2rem 2.5rem;
+          font-size: 1.3rem;
+          font-weight: 800;
+          border-radius: 60px;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           opacity: 0;
-          animation: fadeIn 0.5s ease forwards;
+          animation: fadeIn 0.6s ease forwards;
           animation-delay: 0s;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 8px 25px rgba(15, 252, 190, 0.3), 0 4px 15px rgba(15, 252, 190, 0.2);
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(15, 252, 190, 0.3);
         }
 
         .enter-button:hover {
-          transform: translateX(-50%) scale(1.05);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+          transform: translateX(-50%) scale(1.08) translateY(-2px);
+          box-shadow: 0 15px 40px rgba(15, 252, 190, 0.4), 0 8px 25px rgba(15, 252, 190, 0.3);
+          background: linear-gradient(135deg, #0FFCBE 0%, #0FFCBE 100%);
+          border-color: rgba(15, 252, 190, 0.6);
+        }
+
+        .enter-button:active {
+          transform: translateX(-50%) scale(1.02) translateY(0px);
+          transition: all 0.1s ease;
         }
 
         @keyframes fadeIn {
@@ -328,15 +436,11 @@ const Intro = ({ onComplete }: { onComplete: () => void }) => {
       </div>
 
       <div className="box">
-        <div className="text">WELCOME</div>
-        <div className="text" style={{marginTop: '0.5em'}}>THIS IS JUR'AT'S WEBSITE.</div>
+        <div className="text" style={{animationDelay: '0s'}}>WELCOME</div>
+        <div className="text" style={{marginTop: '0.5em', animationDelay: '0.5s'}}>THIS IS JUR'AT'S WEBSITE.</div>
       </div>
 
-      <div className="smile">
-        <div className="emoji-container">
-          <span className="emoji active">{['🫨', '🤫', '🫡', '👋', '👀'][currentEmojiIndex]}</span>
-        </div>
-      </div>
+      
 
       {!showButton && (
         <div className="scroll-indicator">

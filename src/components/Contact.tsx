@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle } from 'lucide-react';
+import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle, Linkedin } from 'lucide-react';
+import TelegramIcon from './ui/telegram-icon';
 
 interface FormData {
   fullName: string;
@@ -109,27 +110,24 @@ const Contact = () => {
     setSubmitStatus('idle');
 
     try {
-      // Send form data to backend
-      const response = await fetch('/api/contact', {
+      // Send via Formspree (free, reliable, no setup required)
+      // Send via your Formspree endpoint
+      const response = await fetch('https://formspree.io/f/xovnldzn', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send message');
+        throw new Error('Failed to send message');
       }
 
-      const result = await response.json();
-      
-      // Log to console for development
       console.log('Contact Form Submission:', {
         ...formData,
         timestamp: new Date().toISOString(),
-        result
+        message: 'Form submitted successfully (sent)'
       });
 
       // Show success message
@@ -168,17 +166,27 @@ const Contact = () => {
       href: null
     },
     {
-      icon: <Send className="w-6 h-6" />,
+      icon: <TelegramIcon className="w-6 h-6" />,
       label: 'Telegram',
-      value: '@BiteWiseBot',
-      href: 'https://t.me/BiteWiseBot'
+      value: '@jurat1',
+      href: 'https://t.me/jurat1'
+    },
+    {
+      icon: <Linkedin className="w-6 h-6" />,
+      label: 'LinkedIn',
+      value: 'Nortojiyev Jur\'at',
+      href: 'https://www.linkedin.com/in/jur-at-nortojiyev-5399b034a/'
     }
   ];
 
   return (
     <section ref={sectionRef} id="contact" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-slide-up' : ''}`}>
+        <div 
+          className={`text-center mb-16 transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
             Get In <span className="text-gradient">Touch</span>
           </h2>
@@ -189,15 +197,18 @@ const Contact = () => {
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Contact Information */}
-          <div className={`space-y-8 ${isVisible ? 'animate-slide-up' : ''}`} style={{ animationDelay: '0.2s' }}>
+          <div 
+            className={`space-y-8 transition-all duration-1000 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: '0.2s' }}
+          >
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-6">
                 Let's start a conversation
               </h3>
               <p className="text-muted-foreground text-lg mb-8">
-                I'm always excited to discuss new projects, innovative ideas, or opportunities to 
-                collaborate. Whether you have a question about my work or want to explore working together, 
-                don't hesitate to reach out.
+                Do not write to me lightly. Words, like intentions, carry weight. If you wish to reach out, let it be for something that matters—for a project with depth, an idea that can stand the test of doubt, or a collaboration born from conviction. I am not here for distractions. I am here for what is real, for what demands to be created.
               </p>
             </div>
 
@@ -229,20 +240,16 @@ const Contact = () => {
               ))}
             </div>
 
-            {/* Quick Facts */}
-            <div className="bg-gradient-to-r from-mint/10 to-blue/10 rounded-xl p-6 border border-mint/20">
-              <h4 className="text-lg font-semibold text-mint mb-3">Quick Facts</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li>• Usually respond within 24 hours</li>
-                <li>• Available for remote collaboration</li>
-                <li>• Open to freelance and full-time opportunities</li>
-                <li>• Fluent in English, Russian, and Uzbek</li>
-              </ul>
-            </div>
+
           </div>
 
           {/* Contact Form */}
-          <div className={`${isVisible ? 'animate-slide-up' : ''}`} style={{ animationDelay: '0.4s' }}>
+          <div 
+            className={`transition-all duration-1000 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: '0.4s' }}
+          >
             <form onSubmit={handleSubmit} className="card-gradient rounded-xl p-8 space-y-6">
               <h3 className="text-2xl font-bold text-foreground mb-6">
                 Send me a message
@@ -376,7 +383,7 @@ const Contact = () => {
               </button>
 
               <p className="text-sm text-muted-foreground text-center">
-                * All fields are required. Your message will be sent to juratjushkinovich@gmail.com
+                * Required fields. All data is confidential and secure.
               </p>
             </form>
           </div>

@@ -174,23 +174,44 @@ const CreativeBackground = () => {
 
   // Mouse and scroll event handlers
   useEffect(() => {
+    let mouseTicking = false;
+    let scrollTicking = false;
+    let resizeTicking = false;
+
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-      setIsHovering(true);
-      setTimeout(() => setIsHovering(false), 200);
+      if (!mouseTicking) {
+        requestAnimationFrame(() => {
+          setMousePosition({ x: e.clientX, y: e.clientY });
+          mouseTicking = false;
+        });
+        mouseTicking = true;
+      }
     };
 
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!scrollTicking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
     };
 
     const handleResize = () => {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+      if (!resizeTicking) {
+        requestAnimationFrame(() => {
+          setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+          resizeTicking = false;
+        });
+        resizeTicking = true;
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleResize);
+    // Use passive listeners for better performance
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
     
     // Set initial window size
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
@@ -202,7 +223,7 @@ const CreativeBackground = () => {
     };
   }, []);
 
-  // Canvas animation loop with 3D perspective
+  // Canvas animation loop with reduced complexity
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -210,58 +231,45 @@ const CreativeBackground = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    let frameCount = 0;
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frameCount++;
       
-      // Sort particles by Z-depth for proper 3D layering
-      const sortedParticles = [...particles].sort((a, b) => a.z - b.z);
-      
-      // Draw advanced particle effects with 3D perspective
-      sortedParticles.forEach(particle => {
-        ctx.save();
+      // Reduce frame rate for better performance
+      if (frameCount % 2 === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Apply 3D perspective scaling based on Z position
-        const perspective = 1 + (particle.z / 200);
-        const scale = particle.scale * perspective;
-        
-        ctx.globalAlpha = particle.opacity * perspective;
-        ctx.translate(particle.x, particle.y);
-        ctx.rotate((particle.rotation * Math.PI) / 180);
-        ctx.scale(scale, scale);
-        
-        // Create gradient for each particle with 3D depth
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, particle.size * perspective);
-        
-        switch (particle.type) {
-          case 'energy':
-            gradient.addColorStop(0, `rgba(15, 252, 190, ${0.8 * perspective})`);
-            gradient.addColorStop(0.5, `rgba(16, 110, 190, ${0.4 * perspective})`);
-            gradient.addColorStop(1, `rgba(15, 252, 190, 0)`);
-            break;
-          case 'cosmic':
-            gradient.addColorStop(0, `rgba(16, 110, 190, ${0.6 * perspective})`);
-            gradient.addColorStop(0.7, `rgba(15, 252, 190, ${0.3 * perspective})`);
-            gradient.addColorStop(1, `rgba(16, 110, 190, 0)`);
-            break;
-          case 'quantum':
-            gradient.addColorStop(0, `rgba(15, 252, 190, ${0.7 * perspective})`);
-            gradient.addColorStop(0.3, `rgba(16, 110, 190, ${0.5 * perspective})`);
-            gradient.addColorStop(0.7, `rgba(15, 252, 190, ${0.3 * perspective})`);
-            gradient.addColorStop(1, `rgba(16, 110, 190, 0)`);
-            break;
-          default:
-            gradient.addColorStop(0, `rgba(15, 252, 190, ${0.5 * perspective})`);
-            gradient.addColorStop(0.5, `rgba(16, 110, 190, ${0.3 * perspective})`);
-            gradient.addColorStop(1, `rgba(15, 252, 190, 0)`);
-        }
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(0, 0, particle.size * perspective, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.restore();
-      });
+        // Simplified particle rendering
+        particles.forEach(particle => {
+          ctx.save();
+          
+          // Simplified perspective calculation
+          const perspective = 1 + (particle.z / 300);
+          const scale = particle.scale * perspective;
+          
+          ctx.globalAlpha = particle.opacity * 0.8; // Reduced opacity for performance
+          ctx.translate(particle.x, particle.y);
+          ctx.scale(scale, scale);
+          
+          // Simplified gradient
+          const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, particle.size);
+          
+          if (particle.type === 'energy') {
+            gradient.addColorStop(0, 'rgba(15, 252, 190, 0.6)');
+            gradient.addColorStop(1, 'rgba(15, 252, 190, 0)');
+          } else {
+            gradient.addColorStop(0, 'rgba(16, 110, 190, 0.4)');
+            gradient.addColorStop(1, 'rgba(16, 110, 190, 0)');
+          }
+          
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(0, 0, particle.size, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        });
+      }
       
       animationFrameRef.current = requestAnimationFrame(animate);
     };

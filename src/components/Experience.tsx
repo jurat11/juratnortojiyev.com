@@ -1,20 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
-
-interface Experience {
-  id: number;
-  period: string;
-  company: string;
-  job_title: string;
-  status: string;
-  description: string;
-  link: string;
-  created_at: string;
-  updated_at: string;
-}
+import { supabase, Experience as ExperienceType } from '../lib/supabase';
 
 const Experience = () => {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experiences, setExperiences] = useState<ExperienceType[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,19 +32,21 @@ const Experience = () => {
         setIsLoading(true);
         setError(null);
         
-        // Fetch from the backend API
-        const response = await fetch('http://localhost:3001/api/experiences');
+        // Fetch from Supabase
+        const { data, error: supabaseError } = await supabase
+          .from('experiences')
+          .select('*')
+          .order('display_order', { ascending: true })
+          .order('created_at', { ascending: false });
         
-        if (response.ok) {
-          const data = await response.json();
-          setExperiences(data);
-        } else {
-          throw new Error('Failed to fetch experiences');
+        if (supabaseError) {
+          throw new Error(supabaseError.message);
         }
+        
+        setExperiences(data || []);
       } catch (error) {
         console.error('Error fetching experiences:', error);
         setError('Failed to load experiences');
-        // Fallback to empty array
         setExperiences([]);
       } finally {
         setIsLoading(false);
@@ -106,7 +97,11 @@ const Experience = () => {
   return (
     <section ref={sectionRef} id="experience" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-slide-up' : ''}`}>
+        <div 
+          className={`text-center mb-16 transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
             My <span className="text-gradient">Experience</span>
           </h2>
@@ -130,13 +125,15 @@ const Experience = () => {
                   key={experience.id}
                   className={`relative flex flex-col md:flex-row items-start md:items-center ${
                     index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                  } ${isVisible ? 'animate-slide-up' : ''}`}
-                  style={{ animationDelay: `${index * 0.2}s` }}
+                  } transition-all duration-1000 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: `${index * 0.2}s` }}
                 >
                   {/* Timeline Dot */}
                   <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-6">
                     <div className={`w-4 h-4 rounded-full border-4 border-background ${
-                      experience.status === 'current' ? 'bg-mint animate-glow' : 'bg-blue'
+                      experience.period.includes('Present') ? 'bg-mint animate-glow' : 'bg-blue'
                     }`}></div>
                   </div>
 
@@ -159,18 +156,9 @@ const Experience = () => {
                             onClick={() => experience.link && experience.link.trim() !== '' && handleCompanyClick(experience.link)}
                           >
                             {experience.company}
-                            {experience.link && experience.link.trim() !== '' && (
-                              <span className="ml-2 text-sm opacity-70">🔗</span>
-                            )}
                           </h4>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          experience.status === 'current' 
-                            ? 'bg-mint/20 text-mint' 
-                            : 'bg-blue/20 text-blue'
-                        }`}>
-                          {experience.status === 'current' ? 'Current' : 'Past'}
-                        </span>
+
                       </div>
 
                       <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-4">
@@ -216,7 +204,12 @@ const Experience = () => {
         )}
 
         {/* Education Section */}
-        <div className={`mt-20 ${isVisible ? 'animate-fade-in' : ''}`} style={{ animationDelay: '1.5s' }}>
+        <div 
+          className={`mt-20 transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+          style={{ transitionDelay: '1.5s' }}
+        >
           <h3 className="text-3xl font-bold text-center mb-12">
             <span className="text-gradient">Education & Achievements</span>
           </h3>
@@ -226,6 +219,10 @@ const Experience = () => {
               <h4 className="text-xl font-bold text-mint mb-3">Education</h4>
               <p className="text-foreground mb-2">High School Diploma</p>
               <p className="text-muted-foreground">Public School • 2015 - 2026</p>
+              <div className="mt-4 pt-4 border-t border-mint/20">
+                <p className="text-foreground mb-1">SAT 1420 (M.800) - March 2025</p>
+                <p className="text-foreground">IELTS 7 (L.9, R.7.5) - December 2024</p>
+              </div>
             </div>
 
             <div className="card-gradient rounded-xl p-6">

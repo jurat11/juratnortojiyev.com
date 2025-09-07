@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
+
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -15,7 +18,7 @@ const Navigation = () => {
       const progress = (scrollTop / docHeight) * 100;
       setScrollProgress(Math.min(progress, 100));
 
-      const sections = ['about', 'skills', 'experience', 'projects', 'contact'];
+      const sections = ['about', 'skills', 'experience', 'projects', 'blog', 'contact'];
       const currentSection = sections.find(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -30,38 +33,26 @@ const Navigation = () => {
       }
     };
 
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // Press 'i' key to replay intro
-      if (event.key === 'i' || event.key === 'I') {
-        localStorage.removeItem('introSeen');
-        window.location.reload();
-      }
-    };
-
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('keydown', handleKeyPress);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('keydown', handleKeyPress);
     };
   }, []);
 
   const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    console.log('scrollToSection called with:', sectionId);
+    if (sectionId === 'about') {
+      console.log('Navigating to home page');
+      navigate('/');
+    } else {
+      // For other sections, navigate to the route
+      console.log('Navigating to section route:', `/${sectionId}`);
+      navigate(`/${sectionId}`);
     }
   };
 
-  const downloadResume = () => {
-    const link = document.createElement('a');
-    link.href = '/resume-placeholder.pdf';
-    link.download = 'Jurat_Nortojiyev_Resume.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
 
   return (
     <>
@@ -76,7 +67,7 @@ const Navigation = () => {
             <div className="flex items-center">
               <div 
                 className="text-2xl font-bold text-gradient cursor-pointer hover:scale-105 transition-transform duration-300"
-                onClick={() => scrollToSection('about')}
+                onClick={() => navigate('/')}
               >
                 Jur'at
               </div>
@@ -133,6 +124,18 @@ const Navigation = () => {
               </button>
               
               <button
+                onClick={() => scrollToSection('blog')}
+                className={`nav-link relative ${
+                  activeSection === 'blog' ? 'text-mint' : ''
+                }`}
+              >
+                My Blog
+                {activeSection === 'blog' && (
+                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
+                )}
+              </button>
+              
+              <button
                 onClick={() => scrollToSection('contact')}
                 className={`nav-link relative ${
                   activeSection === 'contact' ? 'text-mint' : ''
@@ -147,14 +150,7 @@ const Navigation = () => {
 
 
 
-            {/* Resume Download Button */}
-            <button
-              onClick={downloadResume}
-              className="btn-outline flex items-center gap-2 group hover:scale-105 transition-all duration-300"
-            >
-              <Download size={16} className="group-hover:animate-bounce" />
-              Resume
-            </button>
+
           </div>
         </div>
 

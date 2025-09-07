@@ -1,20 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { ExternalLink, Github } from 'lucide-react';
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  skills: string[];
-  github?: string;
-  live?: string;
-  created_at: string;
-  updated_at: string;
-}
+import { supabase, Project as ProjectType } from '../lib/supabase';
 
 const Portfolio = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectType[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,11 +28,19 @@ const Portfolio = () => {
   }, []);
 
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -53,19 +50,21 @@ const Portfolio = () => {
         setIsLoading(true);
         setError(null);
         
-        // Fetch from the backend API
-        const response = await fetch('http://localhost:3001/api/projects');
+        // Fetch from Supabase
+        const { data, error: supabaseError } = await supabase
+          .from('projects')
+          .select('*')
+          .order('display_order', { ascending: true })
+          .order('created_at', { ascending: false });
         
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
-        } else {
-          throw new Error('Failed to fetch projects');
+        if (supabaseError) {
+          throw new Error(supabaseError.message);
         }
+        
+        setProjects(data || []);
       } catch (error) {
         console.error('Error fetching projects:', error);
         setError('Failed to load projects');
-        // Fallback to empty array
         setProjects([]);
       } finally {
         setIsLoading(false);
@@ -81,7 +80,7 @@ const Portfolio = () => {
     }
   };
 
-  const handleProjectNameClick = (project: Project) => {
+  const handleProjectNameClick = (project: ProjectType) => {
     // Prioritize live demo link, then GitHub link
     if (project.live && project.live.trim() !== '') {
       handleProjectClick(project.live);
@@ -140,7 +139,11 @@ const Portfolio = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className={`text-center mb-16 ${isVisible ? 'animate-slide-up' : ''}`}>
+        <div 
+          className={`text-center mb-16 transition-all duration-1000 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
             My <span className="text-gradient">Projects</span>
           </h2>
@@ -158,22 +161,22 @@ const Portfolio = () => {
             {projects.map((project, index) => (
               <div
                 key={project.id}
-                className={`bg-card/20 backdrop-blur-sm border border-mint/10 rounded-xl overflow-hidden hover:border-mint/30 transition-all duration-300 hover:bg-card/30 card-3d hover-3d-lift ${
-                  isVisible ? 'animate-slide-up' : ''
+                className={`bg-card/20 backdrop-blur-sm border border-mint/10 rounded-xl overflow-hidden hover:border-mint/30 hover:shadow-mint transition-all duration-300 hover:bg-card/30 card-3d hover-3d-lift transition-all duration-1000 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ 
-                  animationDelay: `${index * 0.2}s`,
+                  transitionDelay: `${index * 0.2}s`,
                   transformStyle: 'preserve-3d'
                 }}
               >
                 {/* Project Image - Made Bigger */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-64 overflow-hidden group">
                   <img
                     src={project.image}
                     alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-1"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-black/30 group-hover:to-transparent transition-all duration-500" />
                 </div>
 
                 {/* Project Content */}
@@ -213,12 +216,12 @@ const Portfolio = () => {
 
                   {/* Skills Used */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {project.skills.map((skill, skillIndex) => (
+                    {project.skills.split(',').map((skill, skillIndex) => (
                       <span
                         key={skillIndex}
                         className="text-xs bg-mint/10 text-mint px-2 py-1 rounded-full"
                       >
-                        {skill}
+                        {skill.trim()}
                       </span>
                     ))}
                   </div>
@@ -241,22 +244,7 @@ const Portfolio = () => {
           </div>
         )}
 
-        {/* Call to Action */}
-        <div className={`text-center mt-16 ${isVisible ? 'animate-fade-in' : ''}`} style={{ animationDelay: '1s' }}>
-          <div className="bg-card/20 backdrop-blur-sm border border-mint/10 rounded-xl p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-mint mb-4">Have a Project in Mind?</h3>
-            <p className="text-muted-foreground mb-6">
-              Let's collaborate and bring your ideas to life.
-            </p>
-            <a 
-              href="#contact" 
-              className="btn-primary inline-flex items-center gap-2 hover:scale-105 transition-all duration-300"
-            >
-              Get In Touch
-              <span className="group-hover:animate-bounce">→</span>
-            </a>
-          </div>
-        </div>
+
       </div>
     </section>
   );
