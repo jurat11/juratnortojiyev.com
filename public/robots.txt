@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://jurat-personal-5wq5fuiu1-jjuratov50-3243s-projects.vercel.app/sitemap.xml

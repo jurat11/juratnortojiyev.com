@@ -144,8 +144,8 @@ const Portfolio = () => {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            My <span className="text-gradient">Projects</span>
+          <h2 className="text-4xl lg:text-5xl font-bold mb-6" style={{fontFamily: "'EB Garamond', serif"}}>
+            My <span className="text-gradient">Projects and Activities</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Showcasing my work and technical expertise
@@ -157,7 +157,7 @@ const Portfolio = () => {
             <p className="text-muted-foreground text-lg">No projects found.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
             {projects.map((project, index) => (
               <div
                 key={project.id}
@@ -169,8 +169,8 @@ const Portfolio = () => {
                   transformStyle: 'preserve-3d'
                 }}
               >
-                {/* Project Image - Made Bigger */}
-                <div className="relative h-64 overflow-hidden group">
+                {/* Project Image - Responsive Height */}
+                <div className="relative h-48 md:h-64 overflow-hidden group">
                   <img
                     src={project.image}
                     alt={project.title}
@@ -180,10 +180,10 @@ const Portfolio = () => {
                 </div>
 
                 {/* Project Content */}
-                <div className="p-6">
+                <div className="p-4 md:p-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 
-                      className={`text-xl font-bold transition-all duration-300 ${
+                      className={`text-lg md:text-xl font-bold transition-all duration-300 ${
                         (project.live || project.github) 
                           ? 'text-mint cursor-pointer hover:text-blue hover:scale-105' 
                           : 'text-foreground'
@@ -202,20 +202,20 @@ const Portfolio = () => {
                             handleProjectClick(project.github);
                           }
                         }}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue/20 text-blue hover:bg-blue/40 transition-all duration-300 hover:scale-110"
+                        className="inline-flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full bg-blue/20 text-blue hover:bg-blue/40 transition-all duration-300 hover:scale-110"
                         title="View Project"
                       >
-                        <ExternalLink size={16} />
+                        <ExternalLink size={14} className="md:w-4 md:h-4" />
                       </button>
                     )}
                   </div>
                   
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className="text-muted-foreground mb-3 md:mb-4 leading-relaxed text-sm md:text-base">
                     {project.description}
                   </p>
 
                   {/* Skills Used */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4">
                     {project.skills.split(',').map((skill, skillIndex) => (
                       <span
                         key={skillIndex}
@@ -231,9 +231,9 @@ const Portfolio = () => {
                     <div className="flex gap-3">
                       <button
                         onClick={() => handleProjectClick(project.github!)}
-                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        <Github size={16} />
+                        <Github size={14} className="md:w-4 md:h-4" />
                         GitHub
                       </button>
                     </div>

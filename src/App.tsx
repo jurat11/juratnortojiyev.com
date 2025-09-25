@@ -87,7 +87,6 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/skills" element={<Index />} />
           <Route path="/experience" element={<Index />} />
           <Route path="/projects" element={<Index />} />
           <Route path="/blog" element={<Index />} />

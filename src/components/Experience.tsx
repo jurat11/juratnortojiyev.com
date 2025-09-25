@@ -116,30 +116,102 @@ const Experience = () => {
           </div>
         ) : (
           <div className="relative">
-            {/* Timeline Line */}
-            <div className="absolute left-4 md:left-1/2 transform md:-translate-x-px top-0 bottom-0 w-0.5 bg-gradient-to-b from-mint via-blue to-transparent"></div>
+            {/* Timeline Line - Hidden on mobile */}
+            <div className="hidden md:block absolute left-1/2 transform -translate-x-px top-0 bottom-0 w-0.5 bg-gradient-to-b from-mint via-blue to-transparent"></div>
 
-            <div className="space-y-12">
+            {/* Mobile Grid Layout */}
+            <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
               {experiences.map((experience, index) => (
                 <div
                   key={experience.id}
-                  className={`relative flex flex-col md:flex-row items-start md:items-center ${
-                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                  className={`transition-all duration-1000 ease-out ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: `${index * 0.2}s` }}
+                >
+                  <div className="card-gradient rounded-xl p-4 shadow-elegant hover:shadow-cyan transition-all duration-300 h-full">
+                    <div className="flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-foreground mb-1">
+                            {experience.job_title}
+                          </h3>
+                          <h4 
+                            className={`text-base font-semibold mb-2 transition-all duration-300 ${
+                              experience.link && experience.link.trim() !== '' 
+                                ? 'text-mint cursor-pointer hover:text-blue hover:scale-105' 
+                                : 'text-mint'
+                            }`}
+                            onClick={() => experience.link && experience.link.trim() !== '' && handleCompanyClick(experience.link)}
+                          >
+                            {experience.company}
+                          </h4>
+                        </div>
+                        {/* Mobile Timeline Dot */}
+                        <div className={`w-3 h-3 rounded-full border-2 border-background ${
+                          experience.period.includes('Present') ? 'bg-mint animate-glow' : 'bg-blue'
+                        }`}></div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-3 text-muted-foreground mb-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} />
+                          <span className="text-xs">{experience.period}</span>
+                        </div>
+                        {experience.link && experience.link.trim() !== '' && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleCompanyClick(experience.link)}
+                              className="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 hover:scale-105 transition-all duration-300"
+                            >
+                              <ExternalLink size={12} />
+                              View Company
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {experience.description && (
+                        <div className="space-y-1.5 flex-1">
+                          {experience.description.split('. ').filter(point => point.trim()).map((point, pointIndex) => (
+                            <div
+                              key={pointIndex}
+                              className="text-foreground/80 flex items-start gap-2"
+                            >
+                              <div className="w-1 h-1 bg-mint rounded-full mt-2 flex-shrink-0"></div>
+                              <span className="text-xs">{point.trim()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Timeline Layout */}
+            <div className="hidden md:block space-y-12">
+              {experiences.map((experience, index) => (
+                <div
+                  key={experience.id}
+                  className={`relative flex flex-row items-center ${
+                    index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
                   } transition-all duration-1000 ease-out ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                   style={{ transitionDelay: `${index * 0.2}s` }}
                 >
                   {/* Timeline Dot */}
-                  <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-6">
+                  <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-6">
                     <div className={`w-4 h-4 rounded-full border-4 border-background ${
                       experience.period.includes('Present') ? 'bg-mint animate-glow' : 'bg-blue'
                     }`}></div>
                   </div>
 
                   {/* Content */}
-                  <div className={`flex-1 ml-12 md:ml-0 ${
-                    index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
+                  <div className={`flex-1 ${
+                    index % 2 === 0 ? 'pr-8' : 'pl-8'
                   }`}>
                     <div className="card-gradient rounded-xl p-6 shadow-elegant hover:shadow-cyan transition-all duration-300">
                       <div className="flex flex-wrap items-start justify-between mb-4">
@@ -196,7 +268,7 @@ const Experience = () => {
                   </div>
 
                   {/* Spacer for alternating layout */}
-                  <div className="hidden md:block flex-1"></div>
+                  <div className="flex-1"></div>
                 </div>
               ))}
             </div>

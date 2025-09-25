@@ -444,10 +444,6 @@ const AdminPanel = () => {
     }
   };
 
-  const resetIntro = () => {
-    localStorage.removeItem('introSeen');
-    window.location.reload();
-  };
 
   // Drag and drop functions
   const handleDragStart = (e: React.DragEvent, id: number, type: 'experience' | 'project') => {

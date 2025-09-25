@@ -142,8 +142,6 @@ const BlogDetail = () => {
             type="button"
             onClick={() => {
               console.log('Back button clicked, navigating to blog section');
-              // Ensure intro is marked as seen so home doesn't show intro
-              localStorage.setItem('introSeen', 'true');
               // Navigate back to home page; simplest behavior
               navigate('/');
             }}

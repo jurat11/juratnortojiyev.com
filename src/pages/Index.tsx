@@ -2,29 +2,19 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Hero from '../components/Hero';
-import Skills from '../components/Skills';
 import Experience from '../components/Experience';
 import Portfolio from '../components/Portfolio';
 import Blog from '../components/Blog';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import CreativeBackground from '../components/CreativeBackground';
-import Intro from '../components/Intro';
 
 const Index = () => {
   const location = useLocation();
-  const [showIntro, setShowIntro] = useState(() => {
-    const introSeen = localStorage.getItem('introSeen') === 'true';
-    // Show intro only if we haven't seen it yet
-    return !introSeen;
-  });
 
   useEffect(() => {
     // Handle scrollTo state from navigation (e.g., when coming back from blog detail)
     if (location.state?.scrollTo) {
-      // Mark intro as seen to ensure we don't render intro when navigating back
-      localStorage.setItem('introSeen', 'true');
-      setShowIntro(false);
       const sectionToScroll = location.state.scrollTo;
       console.log('🎯 Scrolling to section from state:', sectionToScroll);
       
@@ -88,7 +78,7 @@ const Index = () => {
   useEffect(() => {
     console.log('🔍 Route change detected! Current pathname:', location.pathname);
     if (location.pathname !== '/') {
-      // Extract section name from path (e.g., /skills -> skills)
+      // Extract section name from path (e.g., /experience -> experience)
       const section = location.pathname.substring(1);
       console.log('🎯 Navigating to section:', section);
       
@@ -104,7 +94,7 @@ const Index = () => {
         } else {
           console.log('❌ Section not found:', section);
           // List all available section IDs for debugging
-          const allSections = ['skills', 'experience', 'projects', 'blog', 'contact'];
+          const allSections = ['experience', 'projects', 'blog', 'contact'];
           allSections.forEach(id => {
             const el = document.getElementById(id);
             console.log(`📋 Section ${id}:`, el ? '✅ found' : '❌ not found');
@@ -130,26 +120,7 @@ const Index = () => {
     }
   }, [location.pathname]);
 
-  const handleIntroComplete = () => {
-    localStorage.setItem('introSeen', 'true');
-    setShowIntro(false);
-    // Ensure we start at the top of the page
-    window.scrollTo(0, 0);
-    // Clear any hash from URL
-    if (window.location.hash) {
-      window.location.hash = '';
-    }
-  };
-
-  console.log('showIntro state:', showIntro);
   console.log('Rendering Index component');
-  
-  if (showIntro) {
-    console.log('Rendering Intro component');
-    return <Intro onComplete={handleIntroComplete} />;
-  }
-  
-  console.log('Rendering main website content');
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,7 +128,6 @@ const Index = () => {
       <Navigation />
       <main>
         <Hero />
-        <Skills />
         <Experience />
         <Portfolio />
         <Blog />

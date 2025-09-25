@@ -18,7 +18,7 @@ const Navigation = () => {
       const progress = (scrollTop / docHeight) * 100;
       setScrollProgress(Math.min(progress, 100));
 
-      const sections = ['about', 'skills', 'experience', 'projects', 'blog', 'contact'];
+      const sections = ['about', 'experience', 'projects', 'blog', 'contact'];
       const currentSection = sections.find(section => {
         const element = document.getElementById(section);
         if (element) {
@@ -83,18 +83,6 @@ const Navigation = () => {
               >
                 About
                 {activeSection === 'about' && (
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
-                )}
-              </button>
-              
-              <button
-                onClick={() => scrollToSection('skills')}
-                className={`nav-link relative ${
-                  activeSection === 'skills' ? 'text-mint' : ''
-                }`}
-              >
-                Skills
-                {activeSection === 'skills' && (
                   <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
                 )}
               </button>
