@@ -11,12 +11,14 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      // Remove console.log in production
       jsxRuntime: 'automatic',
     }),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react/jsx-runtime'],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -26,17 +28,25 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunks
+          // Vendor chunks - keep React in main bundle to avoid loading order issues
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
+            // Don't split React - keep it with main bundle for proper loading
+            if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler/')) {
+              return undefined; // Keep in main bundle
             }
+            // React Router
+            if (id.includes('react-router')) {
+              return 'router-vendor';
+            }
+            // UI libraries
             if (id.includes('lucide-react')) {
               return 'ui-vendor';
             }
+            // Radix UI components
             if (id.includes('@radix-ui')) {
               return 'radix-vendor';
             }
+            // Data libraries
             if (id.includes('@supabase') || id.includes('@tanstack')) {
               return 'data-vendor';
             }
