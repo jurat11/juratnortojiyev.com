@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { Calendar, MapPin, ExternalLink } from 'lucide-react';
+import { useEffect, useState, useRef, memo } from 'react';
+import { Calendar, ArrowRight } from 'lucide-react';
 import { supabase, Experience as ExperienceType } from '../lib/supabase';
 
 const Experience = () => {
@@ -7,6 +7,7 @@ const Experience = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -14,6 +15,12 @@ const Experience = () => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
+          // Animate items one by one
+          experiences.forEach((_, index) => {
+            setTimeout(() => {
+              setVisibleItems(prev => new Set([...prev, index]));
+            }, index * 200); // 200ms delay between each item
+          });
         }
       },
       { threshold: 0.2 }
@@ -24,7 +31,7 @@ const Experience = () => {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [experiences]);
 
   useEffect(() => {
     const fetchExperiences = async () => {
@@ -32,7 +39,6 @@ const Experience = () => {
         setIsLoading(true);
         setError(null);
         
-        // Fetch from Supabase
         const { data, error: supabaseError } = await supabase
           .from('experiences')
           .select('*')
@@ -64,14 +70,14 @@ const Experience = () => {
 
   if (isLoading) {
     return (
-      <section ref={sectionRef} id="experience" className="py-20 bg-background">
+      <section ref={sectionRef} id="experience" className="py-20 relative z-20" style={{ backgroundColor: '#FAFAFA' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              My <span className="text-gradient">Experience</span>
+            <h2 className="text-3xl md:text-4xl font-display font-semibold mb-4" style={{ color: '#A0332B', fontStyle: 'italic' }}>
+              Experience
             </h2>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mint"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-red border-t-transparent" style={{ borderColor: '#A0332B' }}></div>
             </div>
           </div>
         </div>
@@ -81,13 +87,13 @@ const Experience = () => {
 
   if (error) {
     return (
-      <section ref={sectionRef} id="experience" className="py-20 bg-background">
+      <section ref={sectionRef} id="experience" className="py-20 relative z-20" style={{ backgroundColor: '#FAFAFA' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-              My <span className="text-gradient">Experience</span>
+            <h2 className="text-3xl md:text-4xl font-display font-semibold mb-4" style={{ color: '#A0332B', fontStyle: 'italic' }}>
+              Experience
             </h2>
-            <p className="text-red-500">Error loading experiences. Please try again later.</p>
+            <p className="text-red-500 mt-4">Error loading experiences. Please try again later.</p>
           </div>
         </div>
       </section>
@@ -95,182 +101,119 @@ const Experience = () => {
   }
 
   return (
-    <section ref={sectionRef} id="experience" className="py-20 bg-background">
+    <section ref={sectionRef} id="experience" className="py-20 relative z-20" style={{ backgroundColor: '#FAFAFA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           className={`text-center mb-16 transition-all duration-1000 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            My <span className="text-gradient">Experience</span>
+          <h2 className="text-3xl md:text-4xl font-display font-semibold mb-4" style={{ color: '#A0332B', fontStyle: 'italic' }}>
+            Experience
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            A journey through my professional development and key contributions
-          </p>
         </div>
 
         {experiences.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">No experiences found.</p>
+            <p className="text-muted-foreground text-lg font-garamond" style={{ color: '#000000' }}>No experiences found.</p>
           </div>
         ) : (
           <div className="relative">
-            {/* Timeline Line - Hidden on mobile */}
-            <div className="hidden md:block absolute left-1/2 transform -translate-x-px top-0 bottom-0 w-0.5 bg-gradient-to-b from-mint via-blue to-transparent"></div>
+            {/* Timeline Line */}
+            <div className="absolute left-4 md:left-1/2 transform md:-translate-x-px top-0 bottom-0 w-0.5" style={{ backgroundColor: '#E0E0E0' }}></div>
 
-            {/* Mobile Grid Layout */}
-            <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {experiences.map((experience, index) => (
-                <div
-                  key={experience.id}
-                  className={`transition-all duration-1000 ease-out ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{ transitionDelay: `${index * 0.2}s` }}
-                >
-                  <div className="card-gradient rounded-xl p-4 shadow-elegant hover:shadow-cyan transition-all duration-300 h-full">
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-foreground mb-1">
-                            {experience.job_title}
-                          </h3>
-                          <h4 
-                            className={`text-base font-semibold mb-2 transition-all duration-300 ${
-                              experience.link && experience.link.trim() !== '' 
-                                ? 'text-mint cursor-pointer hover:text-blue hover:scale-105' 
-                                : 'text-mint'
-                            }`}
-                            onClick={() => experience.link && experience.link.trim() !== '' && handleCompanyClick(experience.link)}
-                          >
-                            {experience.company}
-                          </h4>
-                        </div>
-                        {/* Mobile Timeline Dot */}
-                        <div className={`w-3 h-3 rounded-full border-2 border-background ${
-                          experience.period.includes('Present') ? 'bg-mint animate-glow' : 'bg-blue'
-                        }`}></div>
-                      </div>
+            <div className="space-y-12">
+              {experiences.map((experience, index) => {
+                const isItemVisible = visibleItems.has(index);
+                return (
+                  <div
+                    key={experience.id}
+                    className={`relative flex flex-col md:flex-row items-start md:items-center ${
+                      index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                    }`}
+                    style={{
+                      opacity: isItemVisible ? 1 : 0,
+                      transform: isItemVisible ? 'translateY(0)' : 'translateY(30px)',
+                      transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+                      transitionDelay: `${index * 0.15}s`
+                    }}
+                  >
+                    {/* Timeline Dot */}
+                    <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-6 z-10">
+                      <div 
+                        className="w-4 h-4 rounded-full border-4 transition-all duration-300"
+                        style={{ 
+                          backgroundColor: experience.period.includes('Present') ? '#A0332B' : 'rgba(160, 51, 43, 0.4)',
+                          borderColor: '#FAFAFA',
+                          boxShadow: isItemVisible ? '0 0 0 4px rgba(160, 51, 43, 0.1)' : 'none'
+                        }}
+                      ></div>
+                    </div>
 
-                      <div className="flex flex-wrap items-center gap-3 text-muted-foreground mb-3">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} />
-                          <span className="text-xs">{experience.period}</span>
+                    {/* Content */}
+                    <div className={`flex-1 ml-12 md:ml-0 ${
+                      index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'
+                    }`}>
+                      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-red/30 group">
+                        <div className="flex flex-wrap items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-garamond font-semibold mb-1" style={{ color: '#000000' }}>
+                              {experience.job_title}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h4 
+                                className={`text-lg font-garamond font-semibold mb-2 transition-all duration-300 inline-flex items-center gap-2 ${
+                                  experience.link && experience.link.trim() !== '' 
+                                    ? 'cursor-pointer hover:opacity-80' 
+                                    : ''
+                                }`}
+                                style={{ color: '#A0332B' }}
+                                onClick={() => experience.link && experience.link.trim() !== '' && handleCompanyClick(experience.link)}
+                              >
+                                {experience.company}
+                                {experience.link && experience.link.trim() !== '' && (
+                                  <ArrowRight 
+                                    size={16} 
+                                    className="transition-all duration-300 group-hover:translate-x-1"
+                                    style={{ 
+                                      color: '#A0332B'
+                                    }}
+                                  />
+                                )}
+                              </h4>
+                            </div>
+                          </div>
                         </div>
-                        {experience.link && experience.link.trim() !== '' && (
+
+                        <div className="flex flex-wrap items-center gap-4 mb-4">
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleCompanyClick(experience.link)}
-                              className="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 hover:scale-105 transition-all duration-300"
-                            >
-                              <ExternalLink size={12} />
-                              View Company
-                            </button>
+                            <Calendar size={16} style={{ color: '#A0332B' }} />
+                            <span className="text-sm font-garamond" style={{ color: '#000000' }}>{experience.period}</span>
+                          </div>
+                        </div>
+
+                        {experience.description && (
+                          <div className="space-y-2">
+                            {experience.description.split('. ').filter(point => point.trim()).map((point, pointIndex) => (
+                              <div
+                                key={pointIndex}
+                                className="flex items-start gap-3 font-garamond"
+                                style={{ color: '#000000' }}
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ backgroundColor: '#A0332B' }}></div>
+                                <span>{point.trim()}</span>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
-
-                      {experience.description && (
-                        <div className="space-y-1.5 flex-1">
-                          {experience.description.split('. ').filter(point => point.trim()).map((point, pointIndex) => (
-                            <div
-                              key={pointIndex}
-                              className="text-foreground/80 flex items-start gap-2"
-                            >
-                              <div className="w-1 h-1 bg-mint rounded-full mt-2 flex-shrink-0"></div>
-                              <span className="text-xs">{point.trim()}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
+
+                    {/* Spacer for alternating layout */}
+                    <div className="hidden md:block flex-1"></div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop Timeline Layout */}
-            <div className="hidden md:block space-y-12">
-              {experiences.map((experience, index) => (
-                <div
-                  key={experience.id}
-                  className={`relative flex flex-row items-center ${
-                    index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
-                  } transition-all duration-1000 ease-out ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{ transitionDelay: `${index * 0.2}s` }}
-                >
-                  {/* Timeline Dot */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-6">
-                    <div className={`w-4 h-4 rounded-full border-4 border-background ${
-                      experience.period.includes('Present') ? 'bg-mint animate-glow' : 'bg-blue'
-                    }`}></div>
-                  </div>
-
-                  {/* Content */}
-                  <div className={`flex-1 ${
-                    index % 2 === 0 ? 'pr-8' : 'pl-8'
-                  }`}>
-                    <div className="card-gradient rounded-xl p-6 shadow-elegant hover:shadow-cyan transition-all duration-300">
-                      <div className="flex flex-wrap items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-foreground mb-1">
-                            {experience.job_title}
-                          </h3>
-                          <h4 
-                            className={`text-lg font-semibold mb-2 transition-all duration-300 ${
-                              experience.link && experience.link.trim() !== '' 
-                                ? 'text-mint cursor-pointer hover:text-blue hover:scale-105' 
-                                : 'text-mint'
-                            }`}
-                            onClick={() => experience.link && experience.link.trim() !== '' && handleCompanyClick(experience.link)}
-                          >
-                            {experience.company}
-                          </h4>
-                        </div>
-
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={16} />
-                          <span className="text-sm">{experience.period}</span>
-                        </div>
-                        {experience.link && experience.link.trim() !== '' && (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleCompanyClick(experience.link)}
-                              className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 hover:scale-105 transition-all duration-300"
-                            >
-                              <ExternalLink size={16} />
-                              View Company
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {experience.description && (
-                        <div className="space-y-2">
-                          {experience.description.split('. ').filter(point => point.trim()).map((point, pointIndex) => (
-                            <div
-                              key={pointIndex}
-                              className="text-foreground/80 flex items-start gap-3"
-                            >
-                              <div className="w-1.5 h-1.5 bg-mint rounded-full mt-2 flex-shrink-0"></div>
-                              <span>{point.trim()}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Spacer for alternating layout */}
-                  <div className="flex-1"></div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -280,29 +223,44 @@ const Experience = () => {
           className={`mt-20 transition-all duration-1000 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
-          style={{ transitionDelay: '1.5s' }}
+          style={{ transitionDelay: `${(experiences.length * 0.15) + 0.3}s` }}
         >
-          <h3 className="text-3xl font-bold text-center mb-12">
-            <span className="text-gradient">Education & Achievements</span>
+          <h3 className="text-2xl md:text-3xl font-display font-semibold text-center mb-12" style={{ color: '#A0332B', fontStyle: 'italic' }}>
+            Education & Achievements
           </h3>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="card-gradient rounded-xl p-6">
-              <h4 className="text-xl font-bold text-mint mb-3">Education</h4>
-              <p className="text-foreground mb-2">High School Diploma</p>
-              <p className="text-muted-foreground">Public School • 2015 - 2026</p>
-              <div className="mt-4 pt-4 border-t border-mint/20">
-                <p className="text-foreground mb-1">SAT 1420 (M.800) - March 2025</p>
-                <p className="text-foreground">IELTS 7 (L.9, R.7.5) - December 2024</p>
+            <div 
+              className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
+              style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease-out',
+                transitionDelay: `${(experiences.length * 0.15) + 0.5}s`
+              }}
+            >
+              <h4 className="text-xl font-garamond font-semibold mb-3" style={{ color: '#A0332B' }}>Education</h4>
+              <p className="font-garamond mb-2" style={{ color: '#000000' }}>High School Diploma</p>
+              <p className="font-garamond text-sm" style={{ color: '#666666' }}>Public School • 2015 - 2026</p>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="font-garamond mb-1" style={{ color: '#000000' }}>IELTS 7 (L.9, R.7.5) - December 2024</p>
               </div>
             </div>
 
-            <div className="card-gradient rounded-xl p-6">
-              <h4 className="text-xl font-bold text-mint mb-3">Languages</h4>
+            <div 
+              className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
+              style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease-out',
+                transitionDelay: `${(experiences.length * 0.15) + 0.7}s`
+              }}
+            >
+              <h4 className="text-xl font-garamond font-semibold mb-3" style={{ color: '#A0332B' }}>Languages</h4>
               <div className="space-y-2">
-                <p className="text-foreground">Uzbek <span className="text-muted-foreground">(Native)</span></p>
-                <p className="text-foreground">Russian <span className="text-muted-foreground">(Native)</span></p>
-                <p className="text-foreground">English <span className="text-muted-foreground">(Professional)</span></p>
+                <p className="font-garamond" style={{ color: '#000000' }}>Uzbek</p>
+                <p className="font-garamond" style={{ color: '#000000' }}>Russian</p>
+                <p className="font-garamond" style={{ color: '#000000' }}>English</p>
               </div>
             </div>
           </div>
@@ -312,4 +270,4 @@ const Experience = () => {
   );
 };
 
-export default Experience;
+export default memo(Experience);

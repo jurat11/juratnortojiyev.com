@@ -27,11 +27,11 @@ const CreativeBackground = () => {
   const animationFrameRef = useRef<number>();
 
   const colors = [
-    'from-mint/30 via-blue/20 to-mint/30',
-    'from-blue/30 via-mint/20 to-blue/30',
-    'from-mint/20 via-blue/10 to-mint/20',
-    'from-blue/20 via-mint/10 to-blue/20',
-    'from-mint/40 via-blue/30 to-mint/40'
+    'from-gray-200/20 via-gray-100/10 to-gray-200/20',
+    'from-gray-100/30 via-gray-200/20 to-gray-100/30',
+    'from-gray-200/20 via-gray-100/10 to-gray-200/20',
+    'from-gray-100/20 via-gray-200/10 to-gray-100/20',
+    'from-gray-200/40 via-gray-100/30 to-gray-200/40'
   ];
 
   const createParticle = useCallback((): Particle => {
@@ -255,11 +255,11 @@ const CreativeBackground = () => {
           const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, particle.size);
           
           if (particle.type === 'energy') {
-            gradient.addColorStop(0, 'rgba(15, 252, 190, 0.6)');
-            gradient.addColorStop(1, 'rgba(15, 252, 190, 0)');
+            gradient.addColorStop(0, 'rgba(229, 231, 235, 0.4)');
+            gradient.addColorStop(1, 'rgba(229, 231, 235, 0)');
           } else {
-            gradient.addColorStop(0, 'rgba(16, 110, 190, 0.4)');
-            gradient.addColorStop(1, 'rgba(16, 110, 190, 0)');
+            gradient.addColorStop(0, 'rgba(243, 244, 246, 0.3)');
+            gradient.addColorStop(1, 'rgba(243, 244, 246, 0)');
           }
           
           ctx.fillStyle = gradient;
@@ -314,7 +314,7 @@ const CreativeBackground = () => {
       {/* Interactive 3D Glow Effect */}
       {isHovering && (
         <div 
-          className="absolute w-[600px] h-[600px] bg-gradient-to-r from-mint/8 via-blue/6 to-mint/8 rounded-full blur-3xl transition-all duration-700 pointer-events-none transform-gpu"
+          className="absolute w-[600px] h-[600px] bg-gradient-to-r from-gray-200/8 via-gray-100/6 to-gray-200/8 rounded-full blur-3xl transition-all duration-700 pointer-events-none transform-gpu"
           style={{
             left: mousePosition.x - 300,
             top: mousePosition.y - 300,
@@ -334,7 +334,7 @@ const CreativeBackground = () => {
           }}
         />
         <div 
-          className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-blue/8 to-transparent animate-pulse transition-transform duration-1000 transform-gpu"
+          className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-gray-200/8 to-transparent animate-pulse transition-transform duration-1000 transform-gpu"
           style={{ 
             transform: `translate3d(0, ${scrollY * -0.15}px, 40px)`,
             animationDelay: '1s',
@@ -362,7 +362,7 @@ const CreativeBackground = () => {
           }}
         />
         <div 
-          className="absolute top-3/4 right-1/6 w-24 h-24 border border-blue/10 rounded-lg animate-3d-scale transition-all duration-2000 transform-gpu"
+          className="absolute top-3/4 right-1/6 w-24 h-24 border border-gray-200 rounded-lg animate-3d-scale transition-all duration-2000 transform-gpu"
           style={{ 
             transform: `translate3d(0, ${scrollY * -0.08}px, 50px) rotateX(${scrollY * -0.03}deg)`,
             animationDelay: '2s',
@@ -382,7 +382,7 @@ const CreativeBackground = () => {
       {/* Enhanced 3D Ambient Energy Fields */}
       <div className="absolute inset-0">
         <div 
-          className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-mint/3 via-blue/2 to-mint/3 rounded-full blur-3xl animate-aurora-glow transition-all duration-3000 transform-gpu"
+          className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-gray-200/3 via-gray-100/2 to-gray-200/3 rounded-full blur-3xl animate-aurora-glow transition-all duration-3000 transform-gpu"
           style={{ 
             transform: `translate3d(0, ${scrollY * 0.03}px, 80px) scale(${1 + Math.sin(Date.now() * 0.001) * 0.1})`,
             animationDelay: '1s',
@@ -390,7 +390,7 @@ const CreativeBackground = () => {
           }}
         />
         <div 
-          className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-gradient-to-r from-blue/3 via-mint/2 to-blue/3 rounded-full blur-3xl animate-aurora-glow transition-all duration-3000 transform-gpu"
+          className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-gradient-to-r from-gray-100/3 via-gray-200/2 to-gray-100/3 rounded-full blur-3xl animate-aurora-glow transition-all duration-3000 transform-gpu"
           style={{ 
             transform: `translate3d(0, ${scrollY * -0.04}px, 100px) scale(${1 + Math.sin(Date.now() * 0.0015) * 0.1})`,
             animationDelay: '3s',

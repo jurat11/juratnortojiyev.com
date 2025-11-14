@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, Clock, ArrowUp } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, ArrowUp, Share2, Linkedin, Twitter } from 'lucide-react';
+import TelegramIcon from './ui/telegram-icon';
 import { supabase } from '../lib/supabase';
 
 interface BlogPost {
@@ -61,6 +62,42 @@ const BlogDetail = () => {
         }
         
         setBlog(data);
+        
+        // Update meta tags for link previews
+        if (data) {
+          const baseUrl = window.location.origin;
+          const blogUrl = window.location.href;
+          const imageUrl = data.image ? (data.image.startsWith('http') ? data.image : `${baseUrl}${data.image}`) : `${baseUrl}/juratphoto.jpg`;
+          const description = data.excerpt || (data.content ? data.content.replace(/<[^>]*>/g, '').substring(0, 200) : '');
+          
+          // Update or create meta tags
+          const updateMetaTag = (property: string, content: string, isProperty = true) => {
+            const attr = isProperty ? 'property' : 'name';
+            let meta = document.querySelector(`meta[${attr}="${property}"]`);
+            if (!meta) {
+              meta = document.createElement('meta');
+              meta.setAttribute(attr, property);
+              document.head.appendChild(meta);
+            }
+            meta.setAttribute('content', content);
+          };
+          
+          // Open Graph tags
+          updateMetaTag('og:title', data.title);
+          updateMetaTag('og:description', description);
+          updateMetaTag('og:image', imageUrl);
+          updateMetaTag('og:url', blogUrl);
+          updateMetaTag('og:type', 'article');
+          
+          // Twitter Card tags
+          updateMetaTag('twitter:card', 'summary_large_image', false);
+          updateMetaTag('twitter:title', data.title, false);
+          updateMetaTag('twitter:description', description, false);
+          updateMetaTag('twitter:image', imageUrl, false);
+          
+          // Update page title
+          document.title = `${data.title} | Jurat Nortojiev`;
+        }
       } catch (error) {
         console.error('Error fetching blog:', error);
         setError('Failed to load blog post');
@@ -81,7 +118,8 @@ const BlogDetail = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -90,7 +128,8 @@ const BlogDetail = () => {
     });
   };
 
-  const getReadingTime = (content: string, customReadTime?: string) => {
+  const getReadingTime = (content: string, customReadTime?: string | null) => {
+    if (!customReadTime && !content) return '';
     if (customReadTime) {
       return customReadTime;
     }
@@ -124,7 +163,7 @@ const BlogDetail = () => {
           <p className="text-muted-foreground mb-6">{error || 'Blog post not found'}</p>
           <button
             onClick={() => navigate('/')}
-            className="bg-mint text-white px-6 py-2 rounded-lg hover:bg-blue transition-colors"
+            className="bg-red text-white px-6 py-2 rounded-lg hover:bg-red-dark transition-colors"
           >
             Back to Home
           </button>
@@ -136,18 +175,25 @@ const BlogDetail = () => {
   return (
     <div className="min-h-screen bg-surface">
       {/* Header */}
-      <header className="bg-card/20 backdrop-blur-sm border-b border-mint/10 sticky top-0 z-50">
+      <header className="bg-card/95 border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             type="button"
             onClick={() => {
-              console.log('Back button clicked, navigating to blog section');
-              // Navigate back to home page; simplest behavior
-              navigate('/');
+              // Go back in browser history to return to the exact position
+              if (window.history.length > 1) {
+                window.history.back();
+              } else {
+                // Fallback: navigate to home and scroll to blog section if no history
+                navigate('/', { state: { scrollTo: 'blog' } });
+              }
             }}
-            className="inline-flex items-center gap-2 text-mint hover:text-blue transition-colors"
+            className="inline-flex items-center gap-2 transition-colors font-garamond"
+            style={{ color: '#A0332B' }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20} style={{ color: '#A0332B' }} />
             Back
           </button>
         </div>
@@ -157,64 +203,160 @@ const BlogDetail = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Blog Header */}
         <header className="mb-8">
-          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
+          <h1 className="text-4xl lg:text-5xl font-display font-semibold mb-4 leading-tight" style={{ color: '#A0332B', fontStyle: 'italic' }}>
             {blog.title}
           </h1>
           
-          <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
+          {blog.excerpt && (
+            <p className="text-xl font-garamond mb-6 leading-relaxed" style={{ color: '#000000' }}>
             {blog.excerpt}
           </p>
+          )}
 
           {/* Meta Information */}
-          <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground mb-6">
+          {blog.read_time && (
+            <div className="flex flex-wrap items-center gap-6 text-sm font-garamond mb-6" style={{ color: '#000000' }}>
             <div className="flex items-center gap-2">
-              <User size={16} className="text-mint" />
-              <span>{blog.author}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-mint" />
-              <span>{formatDate(blog.published_at)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock size={16} className="text-mint" />
+                <Clock size={16} style={{ color: '#A0332B' }} />
               <span>{getReadingTime(blog.content, blog.read_time)}</span>
             </div>
           </div>
+          )}
         </header>
 
         {/* Featured Image */}
         {blog.image && (
-          <div className="mb-8">
+          <div className="mb-8 flex justify-center">
             <img
               src={blog.image}
               alt={blog.title}
-              className="w-full h-64 lg:h-96 object-cover rounded-xl shadow-lg"
+              className="rounded-xl shadow-lg"
+              style={{ width: '60%', height: 'auto' }}
+              loading="eager"
+              decoding="async"
             />
           </div>
         )}
 
         {/* Blog Content */}
         <article className="prose prose-lg max-w-none">
-          <div className="text-foreground leading-relaxed whitespace-pre-wrap">
-            {blog.content}
-          </div>
+          <div 
+            className="font-garamond leading-relaxed whitespace-pre-wrap" 
+            style={{ color: '#000000' }}
+            dangerouslySetInnerHTML={{ __html: blog.content }}
+          />
         </article>
 
-        {/* Footer */}
-        <footer className="mt-12 pt-8 border-t border-mint/10">
-          <div className="text-center">
-            <p className="text-muted-foreground">
-              Written by <span className="text-mint font-medium">{blog.author}</span>
-            </p>
+        {/* Share Buttons */}
+        <div className="mt-12 pt-8 border-t border-gray-200">
+          <p className="text-sm font-garamond mb-4" style={{ color: '#000000' }}>Share this article:</p>
+          <div className="flex flex-wrap gap-3">
+            {/* Instagram */}
+            <button
+              type="button"
+              onClick={() => {
+                const url = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent(blog.title);
+                // Instagram doesn't have direct share API, so we copy the link
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                  alert('Link copied! Paste it in your Instagram story or post.');
+                }).catch(() => {
+                  alert('Please copy this link manually: ' + window.location.href);
+                });
+              }}
+              className="inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-full"
+              style={{ color: '#A0332B', border: '1px solid #A0332B' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#A0332B';
+                e.currentTarget.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#A0332B';
+              }}
+              title="Share on Instagram"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.98-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.98-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </button>
+
+            {/* Telegram */}
+            <button
+              type="button"
+              onClick={() => {
+                const url = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent(blog.title);
+                window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+              }}
+              className="inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-full"
+              style={{ color: '#A0332B', border: '1px solid #A0332B' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#A0332B';
+                e.currentTarget.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#A0332B';
+              }}
+              title="Share on Telegram"
+            >
+              <TelegramIcon size={20} />
+            </button>
+
+            {/* X (Twitter) */}
+            <button
+              type="button"
+              onClick={() => {
+                const url = encodeURIComponent(window.location.href);
+                const text = encodeURIComponent(blog.title);
+                window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+              }}
+              className="inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-full"
+              style={{ color: '#A0332B', border: '1px solid #A0332B' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#A0332B';
+                e.currentTarget.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#A0332B';
+              }}
+              title="Share on X"
+            >
+              <Twitter size={20} />
+            </button>
+
+            {/* LinkedIn */}
+            <button
+              type="button"
+              onClick={() => {
+                const url = encodeURIComponent(window.location.href);
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+              }}
+              className="inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-full"
+              style={{ color: '#A0332B', border: '1px solid #A0332B' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#A0332B';
+                e.currentTarget.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = '#A0332B';
+              }}
+              title="Share on LinkedIn"
+            >
+              <Linkedin size={20} />
+            </button>
           </div>
-        </footer>
+        </div>
       </main>
 
       {/* Scroll to Top Button */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 bg-mint text-white p-3 rounded-full shadow-lg hover:bg-blue transition-all duration-300 hover:scale-110 z-50"
+          className="fixed bottom-8 right-8 bg-gray-200 text-gray-800 p-3 rounded-full shadow-lg hover:bg-gray-300 transition-all duration-300 hover:scale-110 z-50"
         >
           <ArrowUp size={20} />
         </button>

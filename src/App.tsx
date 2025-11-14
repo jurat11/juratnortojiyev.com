@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,9 +20,12 @@ const queryClient = new QueryClient({
   },
 });
 
-// Performance monitoring component
+// Performance monitoring component (development only)
 const PerformanceMonitor = () => {
   useEffect(() => {
+    // Only run in development
+    if (import.meta.env.PROD) return;
+    
     let frameCount = 0;
     let lastTime = performance.now();
     let fps = 60;

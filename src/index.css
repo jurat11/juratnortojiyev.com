@@ -1,5 +1,5 @@
-/* Jur'at's Personal Website Design System */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Jurat's Personal Website Design System */
+/* Fonts loaded via preload in index.html for better performance */
 
 @tailwind base;
 @tailwind components;
@@ -7,15 +7,15 @@
 
 @layer base {
   :root {
-    /* Enhanced Blue and Mint theme */
-    --background: 215 100% 7%; /* Deep dark blue base */
-    --foreground: 200 100% 95%;
+    /* White and Gray theme */
+    --background: 0 0% 100%; /* White base */
+    --foreground: 0 0% 10%;
     
-    --surface: 210 85% 12%;
-    --surface-foreground: 200 100% 95%;
+    --surface: 0 0% 99%; /* Smooth off-white #FCFCFC */
+    --surface-foreground: 0 0% 10%;
     
-    --card: 210 70% 15%;
-    --card-foreground: 200 95% 90%;
+    --card: 0 0% 99.5%; /* Smooth off-white #FEFEFE */
+    --card-foreground: 0 0% 10%;
     
     /* Blue and Mint accent system - using exact hex values */
     --blue: 207 82% 40%; /* #106EBE */
@@ -39,9 +39,9 @@
     --accent: 164 100% 52%;
     --accent-foreground: 215 100% 7%;
     
-    --border: 210 30% 25%;
-    --input: 210 40% 20%;
-    --ring: 164 100% 52%;
+    --border: 0 0% 90%;
+    --input: 0 0% 99.5%; /* Smooth off-white #FEFEFE */
+    --ring: 7 59% 40%; /* Red RAL 3003 */
     
     /* Enhanced Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(215 100% 7%), hsl(210 85% 12%));
@@ -88,13 +88,13 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, hsl(var(--blue)), hsl(var(--mint)));
+    background: hsl(var(--gray-300));
     border-radius: 5px;
     border: 1px solid hsl(var(--border));
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, hsl(var(--mint)), hsl(var(--blue)));
+    background: hsl(var(--gray-400));
   }
 }
 

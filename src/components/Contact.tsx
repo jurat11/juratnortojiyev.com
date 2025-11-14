@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Send, Mail, MapPin, Phone, CheckCircle, AlertCircle, Linkedin } from 'lucide-react';
+import { useState, useRef, useEffect, memo } from 'react';
+import { Send, Mail, MapPin, CheckCircle, AlertCircle, Linkedin } from 'lucide-react';
 import TelegramIcon from './ui/telegram-icon';
 
 interface FormData {
@@ -49,14 +49,12 @@ const Contact = () => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Full name validation
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
     } else if (formData.fullName.trim().length < 2) {
       newErrors.fullName = 'Full name must be at least 2 characters';
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
@@ -64,7 +62,6 @@ const Contact = () => {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Phone validation
     const phoneRegex = /^[\+]?[\d\s\-\(\)]{10,}$/;
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
@@ -72,7 +69,6 @@ const Contact = () => {
       newErrors.phone = 'Please enter a valid phone number';
     }
 
-    // Message validation
     if (!formData.message.trim()) {
       newErrors.message = 'Message is required';
     } else if (formData.message.trim().length < 10) {
@@ -90,7 +86,6 @@ const Contact = () => {
       [name]: value
     }));
 
-    // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -110,8 +105,6 @@ const Contact = () => {
     setSubmitStatus('idle');
 
     try {
-      // Send via Formspree (free, reliable, no setup required)
-      // Send via your Formspree endpoint
       const response = await fetch('https://formspree.io/f/xovnldzn', {
         method: 'POST',
         headers: {
@@ -124,17 +117,9 @@ const Contact = () => {
         throw new Error('Failed to send message');
       }
 
-      console.log('Contact Form Submission:', {
-        ...formData,
-        timestamp: new Date().toISOString(),
-        message: 'Form submitted successfully (sent)'
-      });
-
-      // Show success message
       setSubmitStatus('success');
       setFormData({ fullName: '', email: '', phone: '', message: '' });
       
-      // Reset form after 3 seconds
       setTimeout(() => {
         setSubmitStatus('idle');
       }, 3000);
@@ -143,7 +128,6 @@ const Contact = () => {
       console.error('Form submission error:', error);
       setSubmitStatus('error');
       
-      // Reset error after 3 seconds
       setTimeout(() => {
         setSubmitStatus('idle');
       }, 3000);
@@ -156,13 +140,13 @@ const Contact = () => {
     {
       icon: <Mail className="w-6 h-6" />,
       label: 'Email',
-      value: 'juratnortojiyev@unlockadmissions.uz',
-      href: 'mailto:juratnortojiyev@unlockadmissions.uz'
+      value: 'juratjushkinovich@gmail.com',
+      href: 'mailto:juratjushkinovich@gmail.com'
     },
     {
       icon: <MapPin className="w-6 h-6" />,
       label: 'Location',
-      value: 'Tashkent, Uzbekistan',
+      value: 'based nowhere and everywhere',
       href: null
     },
     {
@@ -174,25 +158,22 @@ const Contact = () => {
     {
       icon: <Linkedin className="w-6 h-6" />,
       label: 'LinkedIn',
-      value: 'Nortojiyev Jur\'at',
+      value: 'Jurat Nortojiev',
       href: 'https://www.linkedin.com/in/jur-at-nortojiyev-5399b034a/'
     }
   ];
 
   return (
-    <section ref={sectionRef} id="contact" className="py-20 bg-background">
+    <section ref={sectionRef} id="contact" className="py-20 relative z-20" style={{ backgroundColor: '#FAFAFA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           className={`text-center mb-16 transition-all duration-1000 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Get In <span className="text-gradient">Touch</span>
+          <h2 className="text-3xl md:text-4xl font-display font-semibold mb-4" style={{ color: '#A0332B', fontStyle: 'italic' }}>
+            Get In Touch
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Have a project in mind or want to discuss opportunities? I'd love to hear from you!
-          </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
@@ -204,43 +185,39 @@ const Contact = () => {
             style={{ transitionDelay: '0.2s' }}
           >
             <div>
-              <h3 className="text-2xl font-bold text-foreground mb-6">
+              <h3 className="text-2xl font-display font-semibold mb-6" style={{ color: '#A0332B', fontStyle: 'italic' }}>
                 Let's start a conversation
               </h3>
-              <p className="text-muted-foreground text-lg mb-8">
-                Do not write to me lightly. Words, like intentions, carry weight. If you wish to reach out, let it be for something that matters—for a project with depth, an idea that can stand the test of doubt, or a collaboration born from conviction. I am not here for distractions. I am here for what is real, for what demands to be created.
-              </p>
             </div>
 
             <div className="space-y-6">
-              {contactInfo.map((info, index) => (
+              {contactInfo.map((info) => (
                 <div
                   key={info.label}
-                  className="flex items-center gap-4 p-4 card-gradient rounded-lg hover:shadow-mint transition-all duration-300"
+                  className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all duration-300"
                 >
-                  <div className="text-mint">
+                  <div style={{ color: '#A0332B' }}>
                     {info.icon}
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{info.label}</p>
+                    <p className="text-sm font-garamond mb-1" style={{ color: '#666666' }}>{info.label}</p>
                     {info.href ? (
                       <a
                         href={info.href}
                         target={info.href.startsWith('http') ? '_blank' : undefined}
                         rel={info.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        className="text-foreground hover:text-mint transition-colors duration-300 font-medium"
+                        className="font-garamond hover:opacity-80 transition-colors duration-300"
+                        style={{ color: '#000000' }}
                       >
                         {info.value}
                       </a>
                     ) : (
-                      <p className="text-foreground font-medium">{info.value}</p>
+                      <p className="font-garamond" style={{ color: '#000000' }}>{info.value}</p>
                     )}
                   </div>
                 </div>
               ))}
             </div>
-
-
           </div>
 
           {/* Contact Form */}
@@ -250,14 +227,14 @@ const Contact = () => {
             }`}
             style={{ transitionDelay: '0.4s' }}
           >
-            <form onSubmit={handleSubmit} className="card-gradient rounded-xl p-8 space-y-6">
-              <h3 className="text-2xl font-bold text-foreground mb-6">
+            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-8 space-y-6">
+              <h3 className="text-2xl font-display font-semibold mb-6" style={{ color: '#A0332B', fontStyle: 'italic' }}>
                 Send me a message
               </h3>
 
               {/* Full Name */}
               <div className="space-y-2">
-                <label htmlFor="fullName" className="block text-sm font-medium text-foreground">
+                <label htmlFor="fullName" className="block text-sm font-medium font-garamond" style={{ color: '#000000' }}>
                   Full Name *
                 </label>
                 <input
@@ -266,13 +243,14 @@ const Contact = () => {
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-input border rounded-lg focus:ring-2 focus:ring-mint focus:border-mint transition-all duration-300 text-foreground placeholder-muted-foreground ${
-                    errors.fullName ? 'border-red-500' : 'border-border'
+                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-red focus:border-red transition-all duration-300 font-garamond ${
+                    errors.fullName ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  style={{ color: '#000000' }}
                   placeholder="Enter your full name"
                 />
                 {errors.fullName && (
-                  <p className="text-sm text-red-500 flex items-center gap-2">
+                  <p className="text-sm text-red-500 flex items-center gap-2 font-garamond">
                     <AlertCircle size={16} />
                     {errors.fullName}
                   </p>
@@ -281,7 +259,7 @@ const Contact = () => {
 
               {/* Email */}
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                <label htmlFor="email" className="block text-sm font-medium font-garamond" style={{ color: '#000000' }}>
                   Email Address *
                 </label>
                 <input
@@ -290,13 +268,14 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-input border rounded-lg focus:ring-2 focus:ring-mint focus:border-mint transition-all duration-300 text-foreground placeholder-muted-foreground ${
-                    errors.email ? 'border-red-500' : 'border-border'
+                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-red focus:border-red transition-all duration-300 font-garamond ${
+                    errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  style={{ color: '#000000' }}
                   placeholder="Enter your email address"
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-500 flex items-center gap-2">
+                  <p className="text-sm text-red-500 flex items-center gap-2 font-garamond">
                     <AlertCircle size={16} />
                     {errors.email}
                   </p>
@@ -305,7 +284,7 @@ const Contact = () => {
 
               {/* Phone */}
               <div className="space-y-2">
-                <label htmlFor="phone" className="block text-sm font-medium text-foreground">
+                <label htmlFor="phone" className="block text-sm font-medium font-garamond" style={{ color: '#000000' }}>
                   Phone Number *
                 </label>
                 <input
@@ -314,13 +293,14 @@ const Contact = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 bg-input border rounded-lg focus:ring-2 focus:ring-mint focus:border-mint transition-all duration-300 text-foreground placeholder-muted-foreground ${
-                    errors.phone ? 'border-red-500' : 'border-border'
+                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-red focus:border-red transition-all duration-300 font-garamond ${
+                    errors.phone ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  style={{ color: '#000000' }}
                   placeholder="Enter your phone number"
                 />
                 {errors.phone && (
-                  <p className="text-sm text-red-500 flex items-center gap-2">
+                  <p className="text-sm text-red-500 flex items-center gap-2 font-garamond">
                     <AlertCircle size={16} />
                     {errors.phone}
                   </p>
@@ -329,7 +309,7 @@ const Contact = () => {
 
               {/* Message */}
               <div className="space-y-2">
-                <label htmlFor="message" className="block text-sm font-medium text-foreground">
+                <label htmlFor="message" className="block text-sm font-medium font-garamond" style={{ color: '#000000' }}>
                   Message *
                 </label>
                 <textarea
@@ -338,13 +318,14 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   rows={4}
-                  className={`w-full px-4 py-3 bg-input border rounded-lg focus:ring-2 focus:ring-mint focus:border-mint transition-all duration-300 text-foreground placeholder-muted-foreground resize-none ${
-                    errors.message ? 'border-red-500' : 'border-border'
+                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-red focus:border-red transition-all duration-300 font-garamond resize-none ${
+                    errors.message ? 'border-red-500' : 'border-gray-300'
                   }`}
+                  style={{ color: '#000000' }}
                   placeholder="Tell me about your project or inquiry..."
                 />
                 {errors.message && (
-                  <p className="text-sm text-red-500 flex items-center gap-2">
+                  <p className="text-sm text-red-500 flex items-center gap-2 font-garamond">
                     <AlertCircle size={16} />
                     {errors.message}
                   </p>
@@ -355,13 +336,14 @@ const Contact = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-garamond transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                   isSubmitting ? 'animate-pulse' : ''
                 }`}
+                style={{ backgroundColor: '#A0332B', color: '#FFFFFF' }}
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Sending...
                   </>
                 ) : submitStatus === 'success' ? (
@@ -382,7 +364,7 @@ const Contact = () => {
                 )}
               </button>
 
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-sm font-garamond text-center" style={{ color: '#666666' }}>
                 * Required fields. All data is confidential and secure.
               </p>
             </form>
@@ -393,4 +375,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default memo(Contact);

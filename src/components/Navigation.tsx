@@ -1,22 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { useNavigate, useLocation } from 'react-router-dom';
+// Throttle function for performance
+const throttle = (func: Function, limit: number) => {
+  let inThrottle: boolean;
+  return function(this: any, ...args: any[]) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+};
 
 const Navigation = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('about');
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isInHero, setIsInHero] = useState(true);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (scrollTop / docHeight) * 100;
-      setScrollProgress(Math.min(progress, 100));
+  const handleScroll = useCallback(
+    throttle(() => {
+      const scrollY = window.scrollY;
+      const heroHeight = window.innerHeight;
+      
+      // Hide navbar when in hero section (first 70% of viewport height, matching hero fade threshold)
+      const fadeThreshold = heroHeight * 0.7;
+      setIsInHero(scrollY < fadeThreshold);
+      setIsScrolled(scrollY > 50);
 
       const sections = ['about', 'experience', 'projects', 'blog', 'contact'];
       const currentSection = sections.find(section => {
@@ -31,138 +42,111 @@ const Navigation = () => {
       if (currentSection) {
         setActiveSection(currentSection);
       }
-    };
+    }, 100), // Throttle to 100ms for better performance
+    []
+  );
 
-    window.addEventListener('scroll', handleScroll);
+  useEffect(() => {
+    // Initialize on mount
+    const scrollY = window.scrollY;
+    const heroHeight = window.innerHeight;
+    const fadeThreshold = heroHeight * 0.7;
+    setIsInHero(scrollY < fadeThreshold);
+    setIsScrolled(scrollY > 50);
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [handleScroll]);
 
-  const scrollToSection = (sectionId: string) => {
-    console.log('scrollToSection called with:', sectionId);
+  const scrollToSection = useCallback((sectionId: string) => {
     if (sectionId === 'about') {
-      console.log('Navigating to home page');
       navigate('/');
     } else {
-      // For other sections, navigate to the route
-      console.log('Navigating to section route:', `/${sectionId}`);
       navigate(`/${sectionId}`);
     }
-  };
-
-
+  }, [navigate]);
 
   return (
-    <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-background/95 backdrop-blur-md shadow-aurora border-b border-mint/10' 
-          : 'bg-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <div 
-                className="text-2xl font-bold text-gradient cursor-pointer hover:scale-105 transition-transform duration-300"
-                onClick={() => navigate('/')}
-              >
-                Jur'at
-              </div>
-            </div>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isInHero 
+        ? 'opacity-0 pointer-events-none' 
+        : isScrolled 
+          ? 'opacity-100 bg-background/80 backdrop-blur-md border-b border-gray-200' 
+          : 'opacity-100 bg-transparent'
+    }`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div 
+            className="text-xl font-display font-bold text-foreground cursor-pointer hover:text-red transition-colors duration-300"
+            onClick={() => navigate('/')}
+          >
+            Jurat
+          </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <button
-                onClick={() => scrollToSection('about')}
-                className={`nav-link relative ${
-                  activeSection === 'about' ? 'text-mint' : ''
-                }`}
-              >
-                About
-                {activeSection === 'about' && (
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
-                )}
-              </button>
-              
-              <button
-                onClick={() => scrollToSection('experience')}
-                className={`nav-link relative ${
-                  activeSection === 'experience' ? 'text-mint' : ''
-                }`}
-              >
-                Experience
-                {activeSection === 'experience' && (
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
-                )}
-              </button>
-              
-              <button
-                onClick={() => scrollToSection('projects')}
-                className={`nav-link relative ${
-                  activeSection === 'projects' ? 'text-mint' : ''
-                }`}
-              >
-                Projects
-                {activeSection === 'projects' && (
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
-                )}
-              </button>
-              
-              <button
-                onClick={() => scrollToSection('blog')}
-                className={`nav-link relative ${
-                  activeSection === 'blog' ? 'text-mint' : ''
-                }`}
-              >
-                My Blog
-                {activeSection === 'blog' && (
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
-                )}
-              </button>
-              
-              <button
-                onClick={() => scrollToSection('contact')}
-                className={`nav-link relative ${
-                  activeSection === 'contact' ? 'text-mint' : ''
-                }`}
-              >
-                Contact
-                {activeSection === 'contact' && (
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-mint to-blue rounded-full animate-pulse" />
-                )}
-              </button>
-            </div>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <button
+              onClick={() => scrollToSection('about')}
+              className={`nav-link ${
+                activeSection === 'about' ? 'text-foreground' : ''
+              }`}
+            >
+              About
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('experience')}
+              className={`nav-link ${
+                activeSection === 'experience' ? 'text-foreground' : ''
+              }`}
+            >
+              Experience
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('projects')}
+              className={`nav-link ${
+                activeSection === 'projects' ? 'text-foreground' : ''
+              }`}
+            >
+              Projects
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('blog')}
+              className={`nav-link ${
+                activeSection === 'blog' ? 'text-foreground' : ''
+              }`}
+            >
+              Blog
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('contact')}
+              className={`nav-link ${
+                activeSection === 'contact' ? 'text-foreground' : ''
+              }`}
+            >
+              Contact
+            </button>
+          </div>
 
-
-
-
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button className="p-2 text-foreground hover:text-red transition-colors duration-300">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
-
-        {/* Website Progress Bar */}
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-mint/10">
-          <div 
-            className="h-full bg-gradient-to-r from-mint to-blue transition-all duration-100 ease-out"
-            style={{ width: `${scrollProgress}%` }}
-          />
-        </div>
-      </nav>
-
-
-
-      {/* Mobile Menu Button */}
-      <div className="md:hidden fixed top-4 right-4 z-50">
-        <button className="p-2 rounded-lg bg-card/50 backdrop-blur-sm border border-mint/20 text-mint hover:bg-card/70 transition-all duration-300 hover:scale-110">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
       </div>
-    </>
+    </nav>
   );
 };
 
-export default Navigation;
+export default memo(Navigation);

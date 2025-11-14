@@ -51,9 +51,33 @@ const AdminPanel = () => {
     excerpt: '',
     content: '',
     image: '',
-    author: 'Nortojiyev Jur\'at',
+    author: 'Jurat Nortojiev',
     read_time: ''
   });
+  
+  // Function to update editor content from contentEditable div
+  const updateEditorContent = () => {
+    const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+    const textarea = document.getElementById('blog-content-textarea') as HTMLTextAreaElement;
+    if (editor && textarea) {
+      const htmlContent = editor.innerHTML;
+      setBlogForm(prev => ({ ...prev, content: htmlContent }));
+      textarea.value = htmlContent;
+    }
+  };
+  
+  // Sync editor content when blogForm.content changes externally (e.g., when editing or resetting)
+  useEffect(() => {
+    const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+    if (editor && showBlogForm) {
+      // Only update if content is different and editor is empty or content was reset
+      const currentContent = editor.innerHTML.trim();
+      const formContent = blogForm.content || '';
+      if (currentContent !== formContent && (currentContent === '' || formContent === '')) {
+        editor.innerHTML = formContent;
+      }
+    }
+  }, [showBlogForm, editingBlog, blogForm.content]);
 
   // File upload refs
   const projectFileInputRef = useRef<HTMLInputElement>(null);
@@ -402,7 +426,7 @@ const AdminPanel = () => {
       // Reset form and refresh data
       setShowBlogForm(false);
       setEditingBlog(null);
-      setBlogForm({ title: '', excerpt: '', content: '', image: '', author: 'Nortojiyev Jur\'at', read_time: '' });
+      setBlogForm({ title: '', excerpt: '', content: '', image: '', author: 'Jurat Nortojiev', read_time: '' });
       fetchData();
     } catch (error) {
       console.error('❌ Error saving blog:', error);
@@ -417,10 +441,17 @@ const AdminPanel = () => {
       excerpt: blog.excerpt,
       content: blog.content,
       image: blog.image || '',
-      author: blog.author || 'Nortojiyev Jur\'at',
+      author: blog.author || 'Jurat Nortojiev',
       read_time: blog.read_time || ''
     });
     setShowBlogForm(true);
+    // Update editor content after form is set
+    setTimeout(() => {
+      const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+      if (editor) {
+        editor.innerHTML = blog.content || '';
+      }
+    }, 100);
   };
 
   const handleDeleteBlog = async (id: number) => {
@@ -508,7 +539,7 @@ const AdminPanel = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">
+            <h1 className="text-3xl font-bold" style={{ color: '#A0332B' }}>
               Admin Panel
             </h1>
             <p className="mt-2 text-gray-600">Sign in to access the admin panel</p>
@@ -535,7 +566,7 @@ const AdminPanel = () => {
                     type="text"
                     value={loginForm.username}
                     onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red"
                     placeholder="Enter username"
                     required
                   />
@@ -555,7 +586,7 @@ const AdminPanel = () => {
                     type="password"
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red"
                     placeholder="Enter password"
                     required
                   />
@@ -564,14 +595,15 @@ const AdminPanel = () => {
               
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-2 px-4 rounded-md hover:opacity-90 transition-opacity font-medium"
+                className="w-full text-white py-2 px-4 rounded-md hover:opacity-90 transition-opacity font-medium"
+                style={{ backgroundColor: '#A0332B' }}
               >
                 Sign In
               </button>
             </form>
             
             <div className="mt-6 text-center">
-              <a href="/" className="text-blue-600 hover:text-blue-800 text-sm transition-colors">
+              <a href="/" className="text-red hover:text-red-dark text-sm transition-colors">
                 ← Back to Website
               </a>
             </div>
@@ -584,7 +616,7 @@ const AdminPanel = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red"></div>
       </div>
     );
   }
@@ -612,12 +644,12 @@ const AdminPanel = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">
+              <h1 className="text-3xl font-bold" style={{ color: '#A0332B' }}>
                 Admin Panel
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="/" className="text-blue-600 hover:text-blue-800 transition-colors">
+              <a href="/" className="text-red hover:text-red-dark transition-colors">
                 ← Back to Website
               </a>
               <button 
@@ -646,7 +678,7 @@ const AdminPanel = () => {
             onClick={() => setActiveTab('experiences')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'experiences'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -656,7 +688,7 @@ const AdminPanel = () => {
             onClick={() => setActiveTab('projects')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'projects'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -666,7 +698,7 @@ const AdminPanel = () => {
             onClick={() => setActiveTab('blogs')}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === 'blogs'
-                ? 'bg-blue-600 text-white'
+                ? 'text-white'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -688,7 +720,8 @@ const AdminPanel = () => {
                   setEditingExperience(null);
                   setExperienceForm({ period: '', company: '', job_title: '', description: '', link: '', display_order: 0 });
                 }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
+                style={{ backgroundColor: '#A0332B' }}
               >
                 <Plus size={16} />
                 Add Experience
@@ -709,7 +742,7 @@ const AdminPanel = () => {
                         type="text"
                         value={experienceForm.period}
                         onChange={(e) => setExperienceForm({ ...experienceForm, period: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                         placeholder="e.g., 2023 - Present"
                         required
                       />
@@ -720,7 +753,7 @@ const AdminPanel = () => {
                         type="text"
                         value={experienceForm.company}
                         onChange={(e) => setExperienceForm({ ...experienceForm, company: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                         placeholder="Company name"
                         required
                       />
@@ -732,7 +765,7 @@ const AdminPanel = () => {
                       type="text"
                       value={experienceForm.job_title}
                       onChange={(e) => setExperienceForm({ ...experienceForm, job_title: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Job title"
                       required
                     />
@@ -743,7 +776,7 @@ const AdminPanel = () => {
                       value={experienceForm.description}
                       onChange={(e) => setExperienceForm({ ...experienceForm, description: e.target.value })}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Job description"
                     />
                   </div>
@@ -753,7 +786,7 @@ const AdminPanel = () => {
                       type="url"
                       value={experienceForm.link}
                       onChange={(e) => setExperienceForm({ ...experienceForm, link: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="https://company.com"
                     />
                   </div>
@@ -763,7 +796,7 @@ const AdminPanel = () => {
                       type="number"
                       value={experienceForm.display_order}
                       onChange={(e) => setExperienceForm({ ...experienceForm, display_order: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="0"
                       min="0"
                     />
@@ -772,7 +805,8 @@ const AdminPanel = () => {
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
+                      style={{ backgroundColor: '#A0332B' }}
                     >
                       <Save size={16} />
                       {editingExperience ? 'Update' : 'Save'}
@@ -817,7 +851,7 @@ const AdminPanel = () => {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900">{experience.job_title}</h3>
-                          <p className="text-blue-600 font-medium">{experience.company}</p>
+                          <p className="font-medium" style={{ color: '#A0332B' }}>{experience.company}</p>
                           <p className="text-sm text-gray-500 mb-2">{experience.period}</p>
                           {experience.description && (
                             <p className="text-gray-700 text-sm">{experience.description}</p>
@@ -827,7 +861,7 @@ const AdminPanel = () => {
                               href={experience.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 text-sm inline-flex items-center gap-1"
+                              className="text-red hover:text-red-dark text-sm inline-flex items-center gap-1"
                             >
                               View Company →
                             </a>
@@ -842,7 +876,10 @@ const AdminPanel = () => {
                           </button>
                           <button
                             onClick={() => handleEditExperience(experience)}
-                            className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            className="p-2 rounded-lg hover:bg-red/10 transition-colors"
+                            style={{ color: '#A0332B' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#8B2A23'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#A0332B'}
                           >
                             <Edit size={16} />
                           </button>
@@ -876,7 +913,8 @@ const AdminPanel = () => {
                   setEditingProject(null);
                   setProjectForm({ title: '', description: '', image: '', skills: '', github: '', live: '', display_order: 0 });
                 }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
+                style={{ backgroundColor: '#A0332B' }}
               >
                 <Plus size={16} />
                 Add Project
@@ -896,7 +934,7 @@ const AdminPanel = () => {
                       type="text"
                       value={projectForm.title}
                       onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Project title"
                       required
                     />
@@ -907,7 +945,7 @@ const AdminPanel = () => {
                       value={projectForm.description}
                       onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Project description"
                       required
                     />
@@ -953,15 +991,15 @@ const AdminPanel = () => {
                           type="url"
                           value={projectForm.image}
                           onChange={(e) => setProjectForm({ ...projectForm, image: e.target.value })}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                           placeholder="Enter image URL"
                         />
                       </div>
                       
                       {/* Upload Status */}
                       {uploading && (
-                        <div className="flex items-center gap-2 text-blue-600">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <div className="flex items-center gap-2" style={{ color: '#A0332B' }}>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red"></div>
                           <span className="text-sm">Uploading image...</span>
                         </div>
                       )}
@@ -981,7 +1019,7 @@ const AdminPanel = () => {
                       type="text"
                       value={projectForm.skills}
                       onChange={(e) => setProjectForm({ ...projectForm, skills: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="e.g., React, TypeScript, CSS"
                       required
                     />
@@ -993,7 +1031,7 @@ const AdminPanel = () => {
                         type="url"
                         value={projectForm.github}
                         onChange={(e) => setProjectForm({ ...projectForm, github: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                         placeholder="https://github.com/username/repo"
                       />
                     </div>
@@ -1003,7 +1041,7 @@ const AdminPanel = () => {
                         type="url"
                         value={projectForm.live}
                         onChange={(e) => setProjectForm({ ...projectForm, live: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                         placeholder="https://demo.com"
                       />
                     </div>
@@ -1014,7 +1052,7 @@ const AdminPanel = () => {
                       type="number"
                       value={projectForm.display_order}
                       onChange={(e) => setProjectForm({ ...projectForm, display_order: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="0"
                       min="0"
                     />
@@ -1023,7 +1061,8 @@ const AdminPanel = () => {
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
+                      style={{ backgroundColor: '#A0332B' }}
                     >
                       <Save size={16} />
                       {editingProject ? 'Update' : 'Save'}
@@ -1085,7 +1124,8 @@ const AdminPanel = () => {
                             {project.skills.split(',').map((skill, index) => (
                               <span
                                 key={index}
-                                className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
+                                className="text-xs px-2 py-1 rounded-full"
+                                style={{ backgroundColor: '#A0332B', color: '#FFFFFF' }}
                               >
                                 {skill.trim()}
                               </span>
@@ -1097,7 +1137,7 @@ const AdminPanel = () => {
                                 href={project.github}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                className="text-red hover:text-red-dark inline-flex items-center gap-1"
                               >
                                 GitHub →
                               </a>
@@ -1107,7 +1147,7 @@ const AdminPanel = () => {
                                 href={project.live}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                                className="text-red hover:text-red-dark inline-flex items-center gap-1"
                               >
                                 Live Demo →
                               </a>
@@ -1123,7 +1163,10 @@ const AdminPanel = () => {
                           </button>
                           <button
                             onClick={() => handleEditProject(project)}
-                            className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            className="p-2 rounded-lg hover:bg-red/10 transition-colors"
+                            style={{ color: '#A0332B' }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#8B2A23'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#A0332B'}
                           >
                             <Edit size={16} />
                           </button>
@@ -1152,9 +1195,17 @@ const AdminPanel = () => {
                 onClick={() => {
                   setShowBlogForm(true);
                   setEditingBlog(null);
-                  setBlogForm({ title: '', excerpt: '', content: '', image: '', author: 'Nortojiyev Jur\'at', read_time: '' });
+                  setBlogForm({ title: '', excerpt: '', content: '', image: '', author: 'Jurat Nortojiev', read_time: '' });
+                  // Clear editor content
+                  setTimeout(() => {
+                    const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+                    if (editor) {
+                      editor.innerHTML = '';
+                    }
+                  }, 100);
                 }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors flex items-center gap-2"
+                style={{ backgroundColor: '#A0332B' }}
               >
                 <Plus size={16} />
                 Add Blog Post
@@ -1174,34 +1225,123 @@ const AdminPanel = () => {
                       type="text"
                       value={blogForm.title}
                       onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Blog post title"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Excerpt *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Excerpt (Optional)</label>
                     <textarea
                       value={blogForm.excerpt}
                       onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Brief summary of the blog post"
-                      required
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+                    
+                    {/* Text Editor Toolbar */}
+                    <div className="flex gap-2 mb-2 p-2 border border-gray-300 rounded-t-md bg-gray-50">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+                          if (editor) {
+                            document.execCommand('bold', false);
+                            updateEditorContent();
+                          }
+                        }}
+                        className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200 transition-colors font-bold"
+                        title="Bold"
+                      >
+                        B
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+                          if (editor) {
+                            document.execCommand('italic', false);
+                            updateEditorContent();
+                          }
+                        }}
+                        className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200 transition-colors italic"
+                        title="Italic"
+                      >
+                        I
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+                          if (editor) {
+                            document.execCommand('underline', false);
+                            updateEditorContent();
+                          }
+                        }}
+                        className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200 transition-colors underline"
+                        title="Underline"
+                      >
+                        U
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = prompt('Enter URL:', 'https://');
+                          if (url) {
+                            const editor = document.getElementById('blog-content-editor') as HTMLDivElement;
+                            if (editor) {
+                              const selection = window.getSelection();
+                              if (selection && selection.rangeCount > 0) {
+                                const range = selection.getRangeAt(0);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.textContent = selection.toString() || url;
+                                link.target = '_blank';
+                                range.deleteContents();
+                                range.insertNode(link);
+                                updateEditorContent();
+                              }
+                            }
+                          }
+                        }}
+                        className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-200 transition-colors"
+                        title="Insert Link"
+                      >
+                        🔗
+                      </button>
+                    </div>
+                    
+                    {/* WYSIWYG Editor */}
+                    <div
+                      id="blog-content-editor"
+                      contentEditable
+                      suppressContentEditableWarning
+                      onInput={updateEditorContent}
+                      onBlur={updateEditorContent}
+                      className="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-b-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900"
+                      style={{ 
+                        whiteSpace: 'pre-wrap',
+                        wordWrap: 'break-word',
+                        fontFamily: 'EB Garamond, serif'
+                      }}
+                    />
+                    
+                    {/* Hidden textarea for form submission */}
                     <textarea
+                      id="blog-content-textarea"
                       value={blogForm.content}
-                      onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                      rows={8}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                      placeholder="Full blog post content (supports markdown)"
+                      onChange={() => {}}
+                      className="hidden"
                       required
                     />
+                    
+                    <p className="text-xs text-gray-500 mt-1">Select text and use toolbar buttons to format. Changes appear in real-time.</p>
                   </div>
 
                   {/* Image Upload Section */}
@@ -1226,33 +1366,76 @@ const AdminPanel = () => {
                         </div>
                       )}
                       
-                      {/* Upload Options */}
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={triggerBlogFileUpload}
-                          disabled={uploading}
-                          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
-                        >
-                          <Upload size={16} />
-                          {uploading ? 'Uploading...' : 'Upload from Device'}
-                        </button>
-                        
-                        <span className="text-sm text-gray-500 self-center">or</span>
-                        
-                        <input
-                          type="url"
-                          value={blogForm.image}
-                          onChange={(e) => setBlogForm({ ...blogForm, image: e.target.value })}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
-                          placeholder="Enter image URL"
-                        />
+                      {/* Pre-uploaded Photos Selection */}
+                      <div>
+                        <p className="text-xs text-gray-600 mb-2">Choose from pre-uploaded photos:</p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {['website photo.jpg', 'website photo 1.jpg', 'website photo 2.jpg', 'website photo 3.jpg', 'website photo 4.jpg', 'website photo 5.jpg', 'website photo 6.jpg'].map((photoName) => {
+                            const photoPath = `/uploads/${photoName}`;
+                            const isSelected = blogForm.image === photoPath;
+                            return (
+                              <button
+                                key={photoName}
+                                type="button"
+                                onClick={() => setBlogForm(prev => ({ ...prev, image: photoPath }))}
+                                className={`relative aspect-video border-2 rounded-lg overflow-hidden transition-all ${
+                                  isSelected
+                                    ? 'border-red-500 ring-2 ring-red-200' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                              >
+                                <img
+                                  src={photoPath}
+                                  alt={photoName}
+                                  className="w-full h-full object-cover"
+                                />
+                                {isSelected && (
+                                  <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                    <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                                      <span className="text-white text-xs">✓</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
+                      
+                      {/* Upload Options - Only show if no pre-uploaded photo is selected */}
+                      {!blogForm.image || !blogForm.image.startsWith('/uploads/website photo') ? (
+                        <div className="space-y-3">
+                          <button
+                            type="button"
+                            onClick={triggerBlogFileUpload}
+                            disabled={uploading}
+                            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          >
+                            <Upload size={16} />
+                            {uploading ? 'Uploading...' : 'Upload from Device'}
+                          </button>
+                          
+                          <div>
+                            <p className="text-xs text-gray-600 mb-2">Or enter custom image URL:</p>
+                            <input
+                              type="url"
+                              value={blogForm.image}
+                              onChange={(e) => setBlogForm({ ...blogForm, image: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
+                              placeholder="Enter image URL"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-gray-500 mt-2">
+                          Selected: {blogForm.image.split('/').pop()}
+                        </div>
+                      )}
                       
                       {/* Upload Status */}
                       {uploading && (
-                        <div className="flex gap-2 text-blue-600">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <div className="flex gap-2" style={{ color: '#A0332B' }}>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red"></div>
                           <span className="text-sm">Uploading image...</span>
                         </div>
                       )}
@@ -1272,7 +1455,7 @@ const AdminPanel = () => {
                       type="text"
                       value={blogForm.author}
                       onChange={(e) => setBlogForm({ ...blogForm, author: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="Author name"
                     />
                   </div>
@@ -1283,7 +1466,7 @@ const AdminPanel = () => {
                       type="text"
                       value={blogForm.read_time}
                       onChange={(e) => setBlogForm({ ...blogForm, read_time: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red focus:border-red text-gray-900 placeholder-gray-500"
                       placeholder="e.g., 5 min read, 10 min read"
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -1294,7 +1477,7 @@ const AdminPanel = () => {
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
                     >
                       <Save size={16} />
                       {editingBlog ? 'Update' : 'Save'}
@@ -1354,7 +1537,7 @@ const AdminPanel = () => {
                         <div className="flex gap-2 ml-4">
                           <button
                             onClick={() => handleEditBlog(blog)}
-                            className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
                           >
                             <Edit size={16} />
                           </button>
