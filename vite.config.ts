@@ -17,7 +17,8 @@ export default defineConfig(({ mode }) => ({
     componentTagger(),
   ].filter(Boolean),
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react/jsx-runtime'],
+    include: ['react', 'react-dom', 'react/jsx-runtime', '@tanstack/react-query', '@supabase/supabase-js'],
+    exclude: ['@tanstack/react-query-devtools'], // Exclude dev tools in production
   },
   resolve: {
     alias: {
@@ -42,8 +43,12 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('lucide-react')) {
               return 'ui-vendor';
             }
-            // Radix UI components
+            // Radix UI components - split by usage
             if (id.includes('@radix-ui')) {
+              // Split frequently used Radix components
+              if (id.includes('@radix-ui/react-toast') || id.includes('@radix-ui/react-tooltip')) {
+                return 'radix-core';
+              }
               return 'radix-vendor';
             }
             // Data libraries
@@ -63,15 +68,22 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
     // Minification and optimization (esbuild is faster and included by default)
     minify: 'esbuild',
-    // Source maps for production (optional, can be disabled for smaller builds)
+    // Source maps for production (disabled for smaller builds)
     sourcemap: false,
     // Optimize asset inlining
     assetsInlineLimit: 4096, // 4kb
     // CSS code splitting
     cssCodeSplit: true,
     // Target modern browsers for smaller bundle
-    target: 'es2015',
+    target: 'es2020', // Updated for better tree-shaking
     // Report compressed size
     reportCompressedSize: true,
+    // Enable terser for better compression (optional, esbuild is faster)
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.log in production
+        drop_debugger: true,
+      },
+    },
   },
 }));

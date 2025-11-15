@@ -11,6 +11,25 @@ import CreativeBackground from '../components/CreativeBackground';
 const Index = () => {
   const location = useLocation();
 
+  // Update page title based on route
+  useEffect(() => {
+    const updateTitle = () => {
+      const path = location.pathname;
+      if (path === '/') {
+        document.title = "Jurat Nortojiev | Developer, Thinker, Questioner | BiteWise & SATashkent";
+      } else if (path === '/experience') {
+        document.title = "Experience & Achievements | Jurat Nortojiev";
+      } else if (path === '/projects') {
+        document.title = "Projects | Jurat Nortojiev - BiteWise, SATashkent & More";
+      } else if (path === '/blog') {
+        document.title = "Blog | Jurat Nortojiev - Thoughts, Experiences, Insights";
+      } else if (path === '/contact') {
+        document.title = "Contact | Jurat Nortojiev";
+      }
+    };
+    updateTitle();
+  }, [location.pathname]);
+
   useEffect(() => {
     // Handle scrollTo state from navigation (e.g., when coming back from blog detail)
     if (location.state?.scrollTo) {

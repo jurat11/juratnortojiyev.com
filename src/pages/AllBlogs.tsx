@@ -27,6 +27,9 @@ const AllBlogs = () => {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // Update page title for SEO
+    document.title = "All Blog Posts | Jurat Nortojiev - Developer, Thinker, Questioner";
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -175,7 +178,7 @@ const AllBlogs = () => {
                     <div className="relative h-48 overflow-hidden bg-gray-100">
                       <img
                         src={blog.image}
-                        alt={blog.title}
+                        alt={`${blog.title} - Blog post by Jurat Nortojiev`}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                         decoding="async"

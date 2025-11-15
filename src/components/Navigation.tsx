@@ -21,27 +21,29 @@ const Navigation = () => {
 
   const handleScroll = useCallback(
     throttle(() => {
-      const scrollY = window.scrollY;
-      const heroHeight = window.innerHeight;
-      
-      // Hide navbar when in hero section (first 70% of viewport height, matching hero fade threshold)
-      const fadeThreshold = heroHeight * 0.7;
-      setIsInHero(scrollY < fadeThreshold);
-      setIsScrolled(scrollY > 50);
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const heroHeight = window.innerHeight;
+        
+        // Hide navbar when in hero section (first 70% of viewport height, matching hero fade threshold)
+        const fadeThreshold = heroHeight * 0.7;
+        setIsInHero(scrollY < fadeThreshold);
+        setIsScrolled(scrollY > 50);
 
-      const sections = ['about', 'experience', 'projects', 'blog', 'contact'];
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2;
+        const sections = ['about', 'experience', 'projects', 'blog', 'contact'];
+        const currentSection = sections.find(section => {
+          const element = document.getElementById(section);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            return rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2;
+          }
+          return false;
+        });
+        
+        if (currentSection) {
+          setActiveSection(currentSection);
         }
-        return false;
       });
-      
-      if (currentSection) {
-        setActiveSection(currentSection);
-      }
     }, 100), // Throttle to 100ms for better performance
     []
   );

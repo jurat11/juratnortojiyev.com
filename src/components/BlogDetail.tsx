@@ -318,7 +318,7 @@ const BlogDetail = () => {
           <div className="mb-8 flex justify-center">
             <img
               src={blog.image}
-              alt={blog.title}
+              alt={`${blog.title} - Featured image for blog post by Jurat Nortojiev`}
               className="rounded-xl shadow-lg"
               style={{ width: '60%', height: 'auto' }}
               loading="eager"

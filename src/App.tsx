@@ -1,4 +1,5 @@
 
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,9 +8,21 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import AllBlogs from "./pages/AllBlogs";
-import AdminPanel from "./components/AdminPanel";
-import BlogDetail from "./components/BlogDetail";
+
+// Lazy load heavy components
+const AllBlogs = lazy(() => import("./pages/AllBlogs"));
+const AdminPanel = lazy(() => import("./components/AdminPanel"));
+const BlogDetail = lazy(() => import("./components/BlogDetail"));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red mx-auto mb-4" style={{ borderColor: '#A0332B' }}></div>
+      <p className="text-muted-foreground font-garamond" style={{ color: '#000000' }}>Loading...</p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -89,20 +102,22 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/experience" element={<Index />} />
-          <Route path="/projects" element={<Index />} />
-          <Route path="/blog/:id" element={<BlogDetail />} />
-          <Route path="/blog" element={<Index />} />
-          <Route path="/blogs" element={<AllBlogs />} />
-          <Route path="/contact" element={<Index />} />
-          {/* Test route to verify routing is working */}
-          <Route path="/test" element={<div>Test route working!</div>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/experience" element={<Index />} />
+            <Route path="/projects" element={<Index />} />
+            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/blog" element={<Index />} />
+            <Route path="/blogs" element={<AllBlogs />} />
+            <Route path="/contact" element={<Index />} />
+            {/* Test route to verify routing is working */}
+            <Route path="/test" element={<div>Test route working!</div>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

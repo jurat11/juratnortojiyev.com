@@ -1,16 +1,22 @@
-import { useEffect, useState, useCallback, memo } from 'react';
+import { useEffect, useState, useCallback, memo, useMemo } from 'react';
 import { ArrowDown } from 'lucide-react';
 import heroImage from '/uploads/Jurat unlock.png';
 import bgImage from '/uploads/chicago.jpg';
 
-// Throttle function for performance
+// Optimized throttle function using requestAnimationFrame
 const throttle = (func: Function, limit: number) => {
   let inThrottle: boolean;
+  let lastRan: number;
   return function(this: any, ...args: any[]) {
     if (!inThrottle) {
       func.apply(this, args);
+      lastRan = Date.now();
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => {
+        if (Date.now() - lastRan >= limit) {
+          inThrottle = false;
+        }
+      }, limit);
     }
   };
 };
@@ -23,7 +29,9 @@ const Hero = () => {
   // Throttled scroll handler for better performance
   const handleScroll = useCallback(
     throttle(() => {
-      setScrollY(window.scrollY);
+      requestAnimationFrame(() => {
+        setScrollY(window.scrollY);
+      });
     }, 16), // ~60fps
     []
   );
@@ -109,7 +117,7 @@ const Hero = () => {
             <div className="relative inline-block">
               <img
                 src={heroImage}
-                alt="Jurat Nortojiev - Developer, Thinker, Questioner"
+                alt="Jurat Nortojiev (Jur'at Nortojiev) - Developer, Thinker, Questioner, Creator of BiteWise and Contributor to SATashkent"
                 className="w-48 h-48 md:w-56 md:h-56 rounded-full object-cover border-2 border-gray-200 shadow-lg"
                 loading="eager"
                 width="224"

@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef, memo } from 'react';
+import { useEffect, useState, useRef, memo, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ArrowRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
 interface BlogPost {
@@ -18,11 +19,24 @@ interface BlogPost {
 
 const Blog = () => {
   const navigate = useNavigate();
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [isVisible, setIsVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+
+  // Use React Query for data fetching with caching
+  const { data: blogs = [], isLoading, error } = useQuery<BlogPost[]>({
+    queryKey: ['blogs'],
+    queryFn: async () => {
+      const { data, error: supabaseError } = await supabase
+        .from('blogs')
+        .select('*')
+        .order('published_at', { ascending: false });
+      
+      if (supabaseError) throw supabaseError;
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -31,50 +45,32 @@ const Blog = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1, rootMargin: '50px' } // Optimized threshold and rootMargin
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const { data, error: supabaseError } = await supabase
-          .from('blogs')
-          .select('*')
-          .order('published_at', { ascending: false });
-        
-        if (supabaseError) throw supabaseError;
-        
-        setBlogs(data || []);
-      } catch (error) {
-        console.error('Error fetching blogs:', error);
-        setError('Failed to load blog posts');
-        setBlogs([]);
-      } finally {
-        setIsLoading(false);
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
+      observer.disconnect();
     };
-
-    fetchBlogs();
   }, []);
 
-  const getReadingTime = (content: string, readTime?: string): string => {
+  const getReadingTime = useCallback((content: string, readTime?: string): string => {
     if (readTime) return readTime;
     if (!content) return '1 min read';
     const wordsPerMinute = 200;
     const words = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
     const minutes = Math.ceil(words / wordsPerMinute);
     return `${minutes} min read`;
-  };
+  }, []);
+
+  const displayedBlogs = useMemo(() => blogs.slice(0, 6), [blogs]);
 
   if (isLoading) {
     return (
@@ -130,8 +126,8 @@ const Blog = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs.slice(0, 6).map((blog, index) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {displayedBlogs.map((blog, index) => (
               <article
                 key={blog.id}
                 itemScope
@@ -153,7 +149,7 @@ const Blog = () => {
                   <div className="relative h-48 overflow-hidden bg-gray-100">
                     <img
                       src={blog.image}
-                      alt={blog.title}
+                      alt={`${blog.title} - Blog post by Jurat Nortojiev`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                       decoding="async"
@@ -220,8 +216,8 @@ const Blog = () => {
               ))}
             </div>
             
-            {/* See More Button */}
-            {blogs.length > 6 && (
+        {/* See More Button */}
+        {blogs.length > displayedBlogs.length && (
               <div 
                 className="text-center mt-12 transition-all duration-1000 ease-out"
                 style={{

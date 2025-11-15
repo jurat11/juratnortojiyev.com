@@ -1,14 +1,31 @@
-import { useEffect, useState, useRef, memo } from 'react';
+import { useEffect, useState, useRef, memo, useCallback } from 'react';
 import { ExternalLink, Github, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase, Project as ProjectType } from '../lib/supabase';
 
 const Portfolio = () => {
-  const [projects, setProjects] = useState<ProjectType[]>([]);
   const [isVisible, setIsVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedProjectIds, setExpandedProjectIds] = useState<Set<number>>(new Set());
   const sectionRef = useRef<HTMLElement>(null);
+
+  // Use React Query for data fetching with caching
+  const { data: projects = [], isLoading, error } = useQuery<ProjectType[]>({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data, error: supabaseError } = await supabase
+        .from('projects')
+        .select('*')
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (supabaseError) {
+        throw new Error(supabaseError.message);
+      }
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -17,73 +34,49 @@ const Portfolio = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1, rootMargin: '50px' } // Optimized
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const { data, error: supabaseError } = await supabase
-          .from('projects')
-          .select('*')
-          .order('display_order', { ascending: true })
-          .order('created_at', { ascending: false });
-        
-        if (supabaseError) {
-          throw new Error(supabaseError.message);
-        }
-        
-        setProjects(data || []);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        setError('Failed to load projects');
-        setProjects([]);
-      } finally {
-        setIsLoading(false);
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
+      observer.disconnect();
     };
-
-    fetchProjects();
   }, []);
 
-  const handleProjectClick = (projectId: number) => {
+  const handleProjectClick = useCallback((projectId: number) => {
     setExpandedProjectIds(prev => {
       const newSet = new Set(prev);
       if (newSet.has(projectId)) {
-        // Don't toggle - just expand if not already expanded
         return newSet;
       } else {
         newSet.add(projectId);
         return newSet;
       }
     });
-  };
+  }, []);
 
-  const handleCloseProject = (projectId: number, e: React.MouseEvent) => {
+  const handleCloseProject = useCallback((projectId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpandedProjectIds(prev => {
       const newSet = new Set(prev);
       newSet.delete(projectId);
       return newSet;
     });
-  };
+  }, []);
 
-  const handleExternalLink = (url: string, e: React.MouseEvent) => {
+  const handleExternalLink = useCallback((url: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (url && url.trim() !== '') {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
-  };
+  }, []);
 
   if (isLoading) {
     return (
@@ -156,7 +149,7 @@ const Portfolio = () => {
                       <div className="relative h-48 overflow-hidden bg-gray-100">
                         <img
                           src={project.image}
-                          alt={project.title}
+                          alt={`${project.title} project by Jurat Nortojiev - ${project.description ? project.description.substring(0, 100) : 'Web development project'}`}
                           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                           loading="lazy"
                           decoding="async"
@@ -192,7 +185,7 @@ const Portfolio = () => {
                         <div className="flex justify-center my-6">
                           <img
                             src={project.image}
-                            alt={project.title}
+                            alt={`${project.title} - Project showcase by Jurat Nortojiev`}
                             className="object-contain"
                             style={{ 
                               width: '40%', 

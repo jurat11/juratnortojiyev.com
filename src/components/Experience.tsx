@@ -1,72 +1,68 @@
-import { useEffect, useState, useRef, memo } from 'react';
+import { useEffect, useState, useRef, memo, useCallback, useMemo } from 'react';
 import { Calendar, ArrowRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase, Experience as ExperienceType } from '../lib/supabase';
 
 const Experience = () => {
-  const [experiences, setExperiences] = useState<ExperienceType[]>([]);
   const [isVisible, setIsVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
   const sectionRef = useRef<HTMLElement>(null);
+
+  // Use React Query for data fetching with caching
+  const { data: experiences = [], isLoading, error } = useQuery<ExperienceType[]>({
+    queryKey: ['experiences'],
+    queryFn: async () => {
+      const { data, error: supabaseError } = await supabase
+        .from('experiences')
+        .select('*')
+        .order('display_order', { ascending: true })
+        .order('created_at', { ascending: false });
+      
+      if (supabaseError) {
+        throw new Error(supabaseError.message);
+      }
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Animate items one by one
+          // Animate items one by one with requestAnimationFrame for smoothness
           experiences.forEach((_, index) => {
-            setTimeout(() => {
-              setVisibleItems(prev => new Set([...prev, index]));
-            }, index * 200); // 200ms delay between each item
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                setVisibleItems(prev => new Set([...prev, index]));
+              }, index * 150); // Reduced delay for faster animation
+            });
           });
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.1, rootMargin: '50px' } // Optimized
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+      observer.disconnect();
+    };
   }, [experiences]);
 
-  useEffect(() => {
-    const fetchExperiences = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const { data, error: supabaseError } = await supabase
-          .from('experiences')
-          .select('*')
-          .order('display_order', { ascending: true })
-          .order('created_at', { ascending: false });
-        
-        if (supabaseError) {
-          throw new Error(supabaseError.message);
-        }
-        
-        setExperiences(data || []);
-      } catch (error) {
-        console.error('Error fetching experiences:', error);
-        setError('Failed to load experiences');
-        setExperiences([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchExperiences();
-  }, []);
-
-  const handleCompanyClick = (link: string) => {
+  const handleCompanyClick = useCallback((link: string) => {
     if (link && link.trim() !== '') {
       window.open(link, '_blank', 'noopener,noreferrer');
     }
-  };
+  }, []);
 
   if (isLoading) {
     return (
