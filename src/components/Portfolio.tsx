@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, memo } from 'react';
-import { ExternalLink, Github } from 'lucide-react';
+import { ExternalLink, Github, X } from 'lucide-react';
 import { supabase, Project as ProjectType } from '../lib/supabase';
 
 const Portfolio = () => {
@@ -7,6 +7,7 @@ const Portfolio = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedProjectIds, setExpandedProjectIds] = useState<Set<number>>(new Set());
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -55,17 +56,32 @@ const Portfolio = () => {
     fetchProjects();
   }, []);
 
-  const handleProjectClick = (link: string) => {
-    if (link && link.trim() !== '') {
-      window.open(link, '_blank', 'noopener,noreferrer');
-    }
+  const handleProjectClick = (projectId: number) => {
+    setExpandedProjectIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        // Don't toggle - just expand if not already expanded
+        return newSet;
+      } else {
+        newSet.add(projectId);
+        return newSet;
+      }
+    });
   };
 
-  const handleProjectNameClick = (project: ProjectType) => {
-    if (project.live && project.live.trim() !== '') {
-      handleProjectClick(project.live);
-    } else if (project.github && project.github.trim() !== '') {
-      handleProjectClick(project.github);
+  const handleCloseProject = (projectId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedProjectIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(projectId);
+      return newSet;
+    });
+  };
+
+  const handleExternalLink = (url: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (url && url.trim() !== '') {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -120,71 +136,135 @@ const Portfolio = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, index) => (
-              <div
-                key={project.id}
-                className={`group bg-card border border-gray-200 rounded-lg overflow-hidden hover:border-red/30 hover:shadow-md transition-all duration-300 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
-                style={{ transitionDelay: `${index * 0.1}s` }}
-              >
-                {/* Project Image */}
-                <div className="relative h-48 overflow-hidden bg-gray-100">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    decoding="async"
-                    width="400"
-                    height="192"
-                    fetchpriority="low"
-                  />
-                </div>
-
-                {/* Project Content */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-xl font-garamond font-semibold" style={{ color: '#000000' }}>
-                      {project.title}
-                    </h3>
-                    {(project.github || project.live) && (
-                      <button
-                        onClick={() => {
-                          if (project.live) {
-                            handleProjectClick(project.live);
-                          } else if (project.github) {
-                            handleProjectClick(project.github);
-                          }
-                        }}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:opacity-80 transition-all duration-300"
-                        style={{ color: '#A0332B', border: '1px solid #A0332B' }}
-                        title="View Project"
-                      >
-                        <ExternalLink size={16} />
-                      </button>
+            {projects.map((project, index) => {
+              const isExpanded = expandedProjectIds.has(project.id);
+              return (
+                <div
+                  key={project.id}
+                  className={`bg-card border border-gray-200 rounded-lg overflow-hidden hover:border-red/30 hover:shadow-md transition-all duration-300 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: `${index * 0.1}s` }}
+                >
+                  <button
+                    onClick={() => handleProjectClick(project.id)}
+                    className="w-full text-left"
+                    disabled={isExpanded}
+                  >
+                    {/* Project Image */}
+                    {project.image && (
+                      <div className="relative h-48 overflow-hidden bg-gray-100">
+                        <img
+                          src={project.image}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                          width="400"
+                          height="192"
+                          fetchpriority="low"
+                        />
+                      </div>
                     )}
-                  </div>
-                  
-                  <p className="font-garamond mb-4 leading-relaxed text-sm" style={{ color: '#000000' }}>
-                    {project.description}
-                  </p>
+                    
+                    {/* Project Name */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-garamond font-semibold" style={{ color: '#000000' }}>
+                        {project.title}
+                      </h3>
+                    </div>
+                  </button>
 
-                  {/* Skills Used */}
-                  <div className="flex flex-wrap gap-2">
-                    {project.skills.split(',').map((skill, skillIndex) => (
-                      <span
-                        key={skillIndex}
-                        className="text-xs px-2 py-1 rounded-full font-garamond"
-                        style={{ backgroundColor: '#A0332B', color: '#FFFFFF' }}
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="px-6 pb-6 border-t border-gray-200 relative">
+                      {/* Close Button */}
+                      <button
+                        onClick={(e) => handleCloseProject(project.id, e)}
+                        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300"
+                        style={{ color: '#A0332B' }}
+                        aria-label="Close project details"
                       >
-                        {skill.trim()}
-                      </span>
-                    ))}
-                  </div>
+                        <X size={20} />
+                      </button>
+                      {/* Project Image - 40% of original dimensions */}
+                      {project.image && (
+                        <div className="flex justify-center my-6">
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="object-contain"
+                            style={{ 
+                              width: '40%', 
+                              height: 'auto',
+                              maxWidth: '100%',
+                              maxHeight: '300px'
+                            }}
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {/* Project Description */}
+                      <p className="font-garamond mb-4 leading-relaxed text-sm md:text-base" style={{ color: '#000000' }}>
+                        {project.description}
+                      </p>
+
+                      {/* Skills Used */}
+                      <div className="mb-4">
+                        <h3 className="text-base font-garamond font-semibold mb-2" style={{ color: '#A0332B' }}>
+                          Technologies Used
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {project.skills.split(',').map((skill, skillIndex) => (
+                            <span
+                              key={skillIndex}
+                              className="text-xs px-2 py-1 rounded-full font-garamond"
+                              style={{ backgroundColor: '#A0332B', color: '#FFFFFF' }}
+                            >
+                              {skill.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Links */}
+                      {(project.github || project.live) && (
+                        <div className="flex flex-wrap gap-3 pt-3 border-t border-gray-200">
+                          {project.live && project.live.trim() !== '' && (
+                            <button
+                              onClick={(e) => handleExternalLink(project.live!, e)}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-garamond font-semibold text-sm transition-all duration-300 hover:opacity-80"
+                              style={{ 
+                                color: '#FFFFFF', 
+                                backgroundColor: '#A0332B',
+                                border: '1px solid #A0332B'
+                              }}
+                            >
+                              <ExternalLink size={16} />
+                              <span>Live Demo</span>
+                            </button>
+                          )}
+                          {project.github && project.github.trim() !== '' && (
+                            <button
+                              onClick={(e) => handleExternalLink(project.github!, e)}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-garamond font-semibold text-sm transition-all duration-300 hover:opacity-80"
+                              style={{ 
+                                color: '#A0332B', 
+                                border: '1px solid #A0332B'
+                              }}
+                            >
+                              <Github size={16} />
+                              <span>View Code</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

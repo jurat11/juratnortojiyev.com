@@ -53,7 +53,17 @@ const Footer = () => {
       {/* Back to Top Button */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-8 right-8 bg-red text-white p-3 rounded-full shadow-lg hover:bg-red-dark transition-all duration-300 hover:scale-110 z-40"
+        className="fixed bottom-8 right-8 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40"
+        style={{ 
+          backgroundColor: '#A0332B',
+          color: '#FFFFFF'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#8B2A24';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#A0332B';
+        }}
         aria-label="Back to top"
       >
         <ArrowUp className="w-5 h-5" />

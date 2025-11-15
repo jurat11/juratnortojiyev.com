@@ -151,13 +151,32 @@ const Hero = () => {
 
           {/* Scroll indicator */}
           <div 
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer group"
+            onClick={() => {
+              window.scrollTo({
+                top: window.innerHeight,
+                behavior: 'smooth'
+              });
+            }}
             style={{ 
               opacity: isInHeroView ? Math.max(0, 1 - scrollY / (fadeThreshold * 0.5)) : 0,
               transition: 'opacity 0.3s ease-out'
             }}
           >
-            <ArrowDown className="w-6 h-6 text-gray-400 animate-bounce" />
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs font-garamond text-gray-600 group-hover:text-gray-800 transition-colors">
+                Scroll down
+              </span>
+              <div className="relative">
+                <ArrowDown 
+                  className="w-6 h-6 transition-all duration-300 group-hover:scale-110"
+                  style={{ 
+                    color: '#A0332B',
+                    animation: 'bounce-smooth 2s ease-in-out infinite'
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>

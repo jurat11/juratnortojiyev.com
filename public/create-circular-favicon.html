@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Circular Favicon</title>
+</head>
+<body>
+    <h1>Create Circular Favicon</h1>
+    <p>This tool will help create a circular version of your favicon.</p>
+    <input type="file" id="imageInput" accept="image/*">
+    <canvas id="canvas" width="32" height="32" style="border: 1px solid #000; margin: 20px 0;"></canvas>
+    <br>
+    <button onclick="downloadFavicon()">Download Circular Favicon</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const imageInput = document.getElementById('imageInput');
+        
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Clear canvas
+                        ctx.clearRect(0, 0, 32, 32);
+                        
+                        // Draw red circular background
+                        ctx.fillStyle = '#A0332B';
+                        ctx.beginPath();
+                        ctx.arc(16, 16, 16, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // Create circular clipping path
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(16, 16, 15, 0, 2 * Math.PI);
+                        ctx.clip();
+                        
+                        // Calculate dimensions to center and fill
+                        const scale = Math.max(32 / img.width, 32 / img.height);
+                        const x = (32 - img.width * scale) / 2;
+                        const y = (32 - img.height * scale) / 2;
+                        
+                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                        ctx.restore();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function downloadFavicon() {
+            const link = document.createElement('a');
+            link.download = 'favicon-circular.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
+

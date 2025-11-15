@@ -229,7 +229,7 @@ const Experience = () => {
             Education & Achievements
           </h3>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div 
               className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
               style={{
@@ -261,6 +261,44 @@ const Experience = () => {
                 <p className="font-garamond" style={{ color: '#000000' }}>Uzbek</p>
                 <p className="font-garamond" style={{ color: '#000000' }}>Russian</p>
                 <p className="font-garamond" style={{ color: '#000000' }}>English</p>
+              </div>
+            </div>
+
+            <div 
+              className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
+              style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.3s ease-out',
+                transitionDelay: `${(experiences.length * 0.15) + 0.9}s`
+              }}
+            >
+              <h4 className="text-xl font-garamond font-semibold mb-3" style={{ color: '#A0332B' }}>Honors and Awards</h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-garamond text-sm font-semibold" style={{ color: '#000000' }}>LaunchX Global Entrepreneurship Bootcamp</p>
+                  <p className="font-garamond text-xs" style={{ color: '#666666' }}>Full Scholarship (Top 3 in Uzbekistan, 30% acceptance rate), 2025</p>
+                </div>
+                <div>
+                  <p className="font-garamond text-sm font-semibold" style={{ color: '#000000' }}>Algoverse AI Research Program</p>
+                  <p className="font-garamond text-xs" style={{ color: '#666666' }}>Global AI Research Cohort (18% acceptance, Spring 2025), Grade 11</p>
+                </div>
+                <div>
+                  <p className="font-garamond text-sm font-semibold" style={{ color: '#000000' }}>Technocamp 2025</p>
+                  <p className="font-garamond text-xs" style={{ color: '#666666' }}>1st National Science Camp (10% acceptance, 200 of 2,000 selected), Grades 11-12</p>
+                </div>
+                <div>
+                  <p className="font-garamond text-sm font-semibold" style={{ color: '#000000' }}>Regional Judo Champion</p>
+                  <p className="font-garamond text-xs" style={{ color: '#666666' }}>1st Place, Tashkent Region (Uzbekistan Judo Federation), Grade 9</p>
+                </div>
+                <div>
+                  <p className="font-garamond text-sm font-semibold" style={{ color: '#000000' }}>Valedictorian</p>
+                  <p className="font-garamond text-xs" style={{ color: '#666666' }}>#1 Ranked Student, School No. 40 (Highest GPA, 3 consecutive years), Grades 10-12</p>
+                </div>
+                <div>
+                  <p className="font-garamond text-sm font-semibold" style={{ color: '#000000' }}>Bentley Pre-College Wall Street 101</p>
+                  <p className="font-garamond text-xs" style={{ color: '#666666' }}>Full Scholarship awarded (unable to attend due to travel costs)</p>
+                </div>
               </div>
             </div>
           </div>

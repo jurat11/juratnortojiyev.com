@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/Person">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/jurat-logo.svg?v=2" />
-    <link rel="shortcut icon" type="image/svg+xml" href="/jurat-logo.svg?v=2" />
-    <link rel="apple-touch-icon" href="/jurat-logo.svg?v=2" />
-    <meta name="msapplication-TileImage" content="/jurat-logo.svg?v=2" />
+    <!-- Favicon - Using PNG directly. For circular frame, create a circular version of the image -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/uploads/Jurat unlock.png?v=3" />
+    <link rel="shortcut icon" type="image/png" href="/uploads/Jurat unlock.png?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/uploads/Jurat unlock.png?v=3" />
+    <meta name="msapplication-TileImage" content="/uploads/Jurat unlock.png?v=3" />
     <meta name="theme-color" content="#A0332B" />
     
     <!-- Primary Meta Tags -->
@@ -17,7 +17,9 @@
     <meta name="title" content="Jurat Nortojiev - Developer, Thinker, Questioner" />
     <meta name="description" content="Jurat Nortojiev - Developer, thinker, and questioner. Specializing in modern web development, AI solutions, and innovative technologies." />
     <meta name="author" content="Jurat Nortojiev" />
-    <meta name="keywords" content="Jurat Nortojiev, web developer, AI enthusiast, JavaScript, TypeScript, React, Python, developer portfolio, software engineer, full stack developer" />
+    <meta name="keywords" content="Jurat Nortojiev, Jurat nortojiev, Jurat Nortojiyev, Jurat nortojiyev, web developer, AI enthusiast, JavaScript, TypeScript, React, Python, developer portfolio, software engineer, full stack developer, Uzbekistan developer" />
+    <meta name="geo.region" content="UZ" />
+    <meta name="geo.placename" content="Uzbekistan" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="language" content="English" />
     <meta name="revisit-after" content="7 days" />
@@ -64,6 +66,7 @@
       "@context": "https://schema.org",
       "@type": "Person",
       "name": "Jurat Nortojiev",
+      "alternateName": ["Jurat nortojiev", "Jurat Nortojiyev", "Jurat nortojiyev"],
       "jobTitle": "Developer, Thinker, Questioner",
       "url": "https://juratnortojiyev.com",
       "image": "https://juratnortojiyev.com/uploads/Jurat%20unlock.png",
@@ -72,8 +75,18 @@
         "https://t.me/jurat1"
       ],
       "email": "juratjushkinovich@gmail.com",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "UZ"
+      },
+      "nationality": {
+        "@type": "Country",
+        "name": "Uzbekistan"
+      },
       "knowsAbout": ["Web Development", "JavaScript", "TypeScript", "React", "Python", "AI", "Software Engineering"],
-      "description": "Developer, thinker, and questioner. Specializing in modern web development, AI solutions, and innovative technologies."
+      "description": "Jurat Nortojiev - Developer, thinker, and questioner. Specializing in modern web development, AI solutions, and innovative technologies.",
+      "alumniOf": "Public School",
+      "award": "LaunchX Global Entrepreneurship Bootcamp, Algoverse AI Research Program, Technocamp 2025, Regional Judo Champion, Valedictorian"
     }
     </script>
     
@@ -83,17 +96,53 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Jurat Nortojiev",
+      "alternateName": "Jurat nortojiev",
       "url": "https://juratnortojiyev.com",
       "description": "Personal portfolio website of Jurat Nortojiev - Developer, Thinker, Questioner",
       "author": {
         "@type": "Person",
-        "name": "Jurat Nortojiev"
+        "name": "Jurat Nortojiev",
+        "alternateName": ["Jurat nortojiev", "Jurat Nortojiyev", "Jurat nortojiyev"]
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://juratnortojiyev.com/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- ProfilePage Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "mainEntity": {
+        "@type": "Person",
+        "name": "Jurat Nortojiev",
+        "alternateName": ["Jurat nortojiev", "Jurat Nortojiyev", "Jurat nortojiyev"],
+        "url": "https://juratnortojiyev.com",
+        "image": "https://juratnortojiyev.com/uploads/Jurat%20unlock.png",
+        "jobTitle": "Developer, Thinker, Questioner",
+        "description": "Jurat Nortojiev is a developer, thinker, and questioner specializing in modern web development, AI solutions, and innovative technologies."
       }
     }
     </script>
   </head>
 
   <body>
+    <!-- Hidden semantic content for SEO -->
+    <div style="display: none;" itemscope itemtype="https://schema.org/Person">
+      <span itemprop="name">Jurat Nortojiev</span>
+      <span itemprop="alternateName">Jurat nortojiev</span>
+      <span itemprop="alternateName">Jurat Nortojiyev</span>
+      <span itemprop="alternateName">Jurat nortojiyev</span>
+      <span itemprop="jobTitle">Developer, Thinker, Questioner</span>
+      <span itemprop="description">Jurat Nortojiev is a developer, thinker, and questioner specializing in modern web development, AI solutions, and innovative technologies.</span>
+      <span itemprop="url">https://juratnortojiyev.com</span>
+      <span itemprop="email">juratjushkinovich@gmail.com</span>
+      <span itemprop="nationality">Uzbekistan</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

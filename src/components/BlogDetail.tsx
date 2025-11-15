@@ -25,6 +25,15 @@ const BlogDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  // Scroll to top when component mounts (fixes mobile scroll issue)
+  useEffect(() => {
+    // Scroll to top immediately
+    window.scrollTo(0, 0);
+    // Also use scrollIntoView for better mobile support
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -63,12 +72,14 @@ const BlogDetail = () => {
         
         setBlog(data);
         
-        // Update meta tags for link previews
+        // Update meta tags for link previews and SEO
         if (data) {
           const baseUrl = window.location.origin;
           const blogUrl = window.location.href;
           const imageUrl = data.image ? (data.image.startsWith('http') ? data.image : `${baseUrl}${data.image}`) : `${baseUrl}/juratphoto.jpg`;
-          const description = data.excerpt || (data.content ? data.content.replace(/<[^>]*>/g, '').substring(0, 200) : '');
+          const plainContent = data.content ? data.content.replace(/<[^>]*>/g, '') : '';
+          const description = data.excerpt || plainContent.substring(0, 200) || `${data.title} by Jurat Nortojiev`;
+          const keywords = `${data.title}, Jurat Nortojiev, blog, ${plainContent.substring(0, 100).split(' ').slice(0, 10).join(', ')}`;
           
           // Update or create meta tags
           const updateMetaTag = (property: string, content: string, isProperty = true) => {
@@ -82,21 +93,80 @@ const BlogDetail = () => {
             meta.setAttribute('content', content);
           };
           
+          // Basic SEO meta tags
+          updateMetaTag('description', description, false);
+          updateMetaTag('keywords', keywords, false);
+          updateMetaTag('author', data.author || 'Jurat Nortojiev', false);
+          updateMetaTag('article:author', data.author || 'Jurat Nortojiev');
+          updateMetaTag('article:published_time', data.published_at || data.created_at);
+          updateMetaTag('article:modified_time', data.updated_at || data.created_at);
+          
+          // Canonical URL
+          let canonical = document.querySelector('link[rel="canonical"]');
+          if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.setAttribute('rel', 'canonical');
+            document.head.appendChild(canonical);
+          }
+          canonical.setAttribute('href', blogUrl);
+          
           // Open Graph tags
           updateMetaTag('og:title', data.title);
           updateMetaTag('og:description', description);
           updateMetaTag('og:image', imageUrl);
           updateMetaTag('og:url', blogUrl);
           updateMetaTag('og:type', 'article');
+          updateMetaTag('og:site_name', 'Jurat Nortojiev');
+          updateMetaTag('og:author', data.author || 'Jurat Nortojiev');
           
           // Twitter Card tags
           updateMetaTag('twitter:card', 'summary_large_image', false);
           updateMetaTag('twitter:title', data.title, false);
           updateMetaTag('twitter:description', description, false);
           updateMetaTag('twitter:image', imageUrl, false);
+          updateMetaTag('twitter:creator', '@juratnortojiev', false);
           
           // Update page title
           document.title = `${data.title} | Jurat Nortojiev`;
+          
+          // Add structured data (JSON-LD) for Article
+          const existingArticleSchema = document.getElementById('article-schema');
+          if (existingArticleSchema) {
+            existingArticleSchema.remove();
+          }
+          
+          const articleSchema = document.createElement('script');
+          articleSchema.id = 'article-schema';
+          articleSchema.type = 'application/ld+json';
+          articleSchema.textContent = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": data.title,
+            "description": description,
+            "image": imageUrl,
+            "author": {
+              "@type": "Person",
+              "name": data.author || "Jurat Nortojiev",
+              "url": "https://juratnortojiyev.com"
+            },
+            "publisher": {
+              "@type": "Person",
+              "name": "Jurat Nortojiev",
+              "url": "https://juratnortojiyev.com",
+              "image": `${baseUrl}/uploads/Jurat unlock.png`
+            },
+            "datePublished": data.published_at || data.created_at,
+            "dateModified": data.updated_at || data.created_at,
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": blogUrl
+            },
+            "url": blogUrl,
+            "articleBody": plainContent,
+            "keywords": keywords,
+            "inLanguage": "en-US"
+          });
+          document.head.appendChild(articleSchema);
         }
       } catch (error) {
         console.error('Error fetching blog:', error);
@@ -108,6 +178,18 @@ const BlogDetail = () => {
 
     fetchBlog();
   }, [id]);
+
+  // Scroll to top after blog is loaded (additional fix for mobile)
+  useEffect(() => {
+    if (!isLoading && blog) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 100);
+    }
+  }, [isLoading, blog]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -180,12 +262,19 @@ const BlogDetail = () => {
           <button
             type="button"
             onClick={() => {
-              // Go back in browser history to return to the exact position
-              if (window.history.length > 1) {
-                window.history.back();
+              // Get the stored return path and scroll position
+              const returnPath = localStorage.getItem('blogReturnPath') || '/';
+              const scrollTo = localStorage.getItem('blogReturnScroll');
+              
+              // Clear the stored values
+              localStorage.removeItem('blogReturnPath');
+              localStorage.removeItem('blogReturnScroll');
+              
+              // Navigate to the stored location
+              if (scrollTo) {
+                navigate(returnPath, { state: { scrollTo } });
               } else {
-                // Fallback: navigate to home and scroll to blog section if no history
-                navigate('/', { state: { scrollTo: 'blog' } });
+                navigate(returnPath);
               }
             }}
             className="inline-flex items-center gap-2 transition-colors font-garamond"
@@ -202,13 +291,13 @@ const BlogDetail = () => {
       {/* Blog Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Blog Header */}
-        <header className="mb-8">
-          <h1 className="text-4xl lg:text-5xl font-display font-semibold mb-4 leading-tight" style={{ color: '#A0332B', fontStyle: 'italic' }}>
+        <header className="mb-8" itemScope itemType="https://schema.org/BlogPosting">
+          <h1 className="text-4xl lg:text-5xl font-display font-semibold mb-4 leading-tight" style={{ color: '#A0332B', fontStyle: 'italic' }} itemProp="headline">
             {blog.title}
           </h1>
           
           {blog.excerpt && (
-            <p className="text-xl font-garamond mb-6 leading-relaxed" style={{ color: '#000000' }}>
+            <p className="text-xl font-garamond mb-6 leading-relaxed" style={{ color: '#000000' }} itemProp="description">
             {blog.excerpt}
           </p>
           )}
@@ -239,10 +328,11 @@ const BlogDetail = () => {
         )}
 
         {/* Blog Content */}
-        <article className="prose prose-lg max-w-none">
+        <article className="prose prose-lg max-w-none" itemScope itemType="https://schema.org/BlogPosting">
           <div 
             className="font-garamond leading-relaxed whitespace-pre-wrap" 
             style={{ color: '#000000' }}
+            itemProp="articleBody"
             dangerouslySetInnerHTML={{ __html: blog.content }}
           />
         </article>

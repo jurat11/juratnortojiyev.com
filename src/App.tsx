@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AllBlogs from "./pages/AllBlogs";
 import AdminPanel from "./components/AdminPanel";
 import BlogDetail from "./components/BlogDetail";
 
@@ -93,9 +94,10 @@ const App = () => (
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/experience" element={<Index />} />
           <Route path="/projects" element={<Index />} />
-          <Route path="/blog" element={<Index />} />
-          <Route path="/contact" element={<Index />} />
           <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/blog" element={<Index />} />
+          <Route path="/blogs" element={<AllBlogs />} />
+          <Route path="/contact" element={<Index />} />
           {/* Test route to verify routing is working */}
           <Route path="/test" element={<div>Test route working!</div>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -129,16 +129,22 @@ const Blog = () => {
             <p className="text-muted-foreground text-lg font-garamond" style={{ color: '#000000' }}>No blog posts yet. Check back soon!</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogs.map((blog, index) => (
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blogs.slice(0, 6).map((blog, index) => (
               <article
                 key={blog.id}
+                itemScope
+                itemType="https://schema.org/BlogPosting"
                 className={`group bg-card border border-gray-200 rounded-lg overflow-hidden hover:border-red/30 hover:shadow-md transition-all duration-300 cursor-pointer ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ transitionDelay: `${index * 0.1}s` }}
                 onClick={() => {
                   localStorage.setItem('currentBlog', JSON.stringify(blog));
+                  // Store the previous location (home page blog section)
+                  localStorage.setItem('blogReturnPath', '/');
+                  localStorage.setItem('blogReturnScroll', 'blog');
                   navigate(`/blog/${blog.id}`);
                 }}
               >
@@ -168,35 +174,39 @@ const Blog = () => {
                     </div>
                   )}
 
-                  {/* Title */}
-                  <h3 className="text-xl font-garamond font-semibold mb-3 line-clamp-2" style={{ color: '#000000' }}>
-                    {blog.title}
-                  </h3>
-                  
-                  {/* Excerpt */}
-                  <p 
-                    className="font-garamond mb-4 line-clamp-3 leading-relaxed text-sm" 
-                    style={{ color: '#000000' }}
-                    dangerouslySetInnerHTML={{ 
-                      __html: blog.excerpt || (() => {
-                        if (!blog.content) return '';
-                        // Strip HTML tags for fallback excerpt
-                        const plainContent = blog.content.replace(/<[^>]*>/g, '');
-                        const sentences = plainContent
-                          .split(/[.!?]+/)
-                          .map(s => s.trim())
-                          .filter(s => s.length > 20)
-                          .slice(0, 3);
-                        return sentences.length > 0 ? sentences.join('. ').trim() + '.' : plainContent.substring(0, 150).trim() + '...';
-                      })()
-                    }}
-                  />
+                    {/* Title */}
+                    <h3 className="text-xl font-garamond font-semibold mb-3 line-clamp-2" style={{ color: '#000000' }} itemProp="headline">
+                      {blog.title}
+                    </h3>
+                    
+                    {/* Excerpt */}
+                    <p 
+                      className="font-garamond mb-4 line-clamp-3 leading-relaxed text-sm" 
+                      style={{ color: '#000000' }}
+                      itemProp="description"
+                      dangerouslySetInnerHTML={{ 
+                        __html: blog.excerpt || (() => {
+                          if (!blog.content) return '';
+                          // Strip HTML tags for fallback excerpt
+                          const plainContent = blog.content.replace(/<[^>]*>/g, '');
+                          const sentences = plainContent
+                            .split(/[.!?]+/)
+                            .map(s => s.trim())
+                            .filter(s => s.length > 20)
+                            .slice(0, 3);
+                          return sentences.length > 0 ? sentences.join('. ').trim() + '.' : plainContent.substring(0, 150).trim() + '...';
+                        })()
+                      }}
+                    />
 
                   {/* Read More Button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       localStorage.setItem('currentBlog', JSON.stringify(blog));
+                      // Store the previous location (home page blog section)
+                      localStorage.setItem('blogReturnPath', '/');
+                      localStorage.setItem('blogReturnScroll', 'blog');
                       navigate(`/blog/${blog.id}`);
                     }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-garamond transition-all duration-300 hover:opacity-80"
@@ -207,8 +217,34 @@ const Blog = () => {
                   </button>
                 </div>
               </article>
-            ))}
-          </div>
+              ))}
+            </div>
+            
+            {/* See More Button */}
+            {blogs.length > 6 && (
+              <div 
+                className="text-center mt-12 transition-all duration-1000 ease-out"
+                style={{
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
+                  transitionDelay: `${Math.min(blogs.length, 6) * 0.1 + 0.3}s`
+                }}
+              >
+                <button
+                  onClick={() => navigate('/blogs')}
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-garamond font-semibold transition-all duration-300 hover:opacity-80 hover:scale-105"
+                  style={{ 
+                    color: '#FFFFFF', 
+                    backgroundColor: '#A0332B',
+                    border: '1px solid #A0332B'
+                  }}
+                >
+                  <span>See More</span>
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

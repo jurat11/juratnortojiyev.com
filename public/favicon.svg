@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <mask id="circleMask">
+      <rect width="32" height="32" fill="white"/>
+      <circle cx="16" cy="16" r="16" fill="black"/>
+    </mask>
+  </defs>
+  <!-- Red circular background -->
+  <circle cx="16" cy="16" r="16" fill="#A0332B"/>
+  <!-- This will be overlaid by the PNG favicon in browsers that support it -->
+  <circle cx="16" cy="16" r="15" fill="#FFFFFF" opacity="0.2"/>
+</svg>
